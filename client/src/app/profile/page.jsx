@@ -3,5 +3,3 @@ function pageProfile() {
     <div>Beauford</div>
   )
 }
-
-export default pageProfile
