@@ -1,7 +1,14 @@
 import React from "react";
 
 const Navbar = () => {
-  return <div>nav</div>;
+  return (
+    <div className = "flex flex-col">
+      <div>
+        <p>LOGO</p>
+      </div>
+    </div>
+  );
+  
 };
 
 export default Navbar;
