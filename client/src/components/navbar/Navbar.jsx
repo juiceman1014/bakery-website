@@ -2,10 +2,8 @@ import React from "react";
 
 const Navbar = () => {
   return (
-    
-    <div className = "h-screen">
-      <div className = "flex flex-col justify-between h-full">
-
+    <div className="h-screen">
+      <div className="flex flex-col justify-between h-full">
         <div className>LOGO</div>
 
         <div>Menu/Order</div>
@@ -19,11 +17,9 @@ const Navbar = () => {
         <div>CART</div>
 
         <div>Translate</div>
-
       </div>
     </div>
   );
-  
 };
 
 export default Navbar;
