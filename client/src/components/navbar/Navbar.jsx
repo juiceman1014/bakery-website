@@ -6,7 +6,9 @@ const Navbar = () => {
       <div className="flex flex-col justify-between h-full">
         <div className>LOGO</div>
 
-        <div>Menu/Order</div>
+        <div>
+          <button>Menu/Order</button>
+        </div>
 
         <div>
           <p>About</p>
