@@ -3,11 +3,11 @@ import React from "react";
 const Navbar = () => {
   return (
     <div className="h-screen">
-      <div className="flex flex-col justify-between h-full">
+      <div className="flex flex-col justify-between h-full w-24 bg-orange-100 items-center">
 
         <div>
           <button>
-            <img src="/mooncake-sample-logo.jpeg" alt="Mooncake Logo"/>
+            <img className = "h-20" src="/mooncake-sample-logo.jpeg" alt="Mooncake Logo"/>
           </button>
         </div>
 
@@ -23,7 +23,7 @@ const Navbar = () => {
 
         <div>
           <button>
-            <img src="/cart-sample-logo.jpeg" alt="Cart Logo"/>
+            <img className = "h-20" src="/cart-sample-logo.jpeg" alt="Cart Logo"/>
           </button>
         </div>
 
