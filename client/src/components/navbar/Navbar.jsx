@@ -10,10 +10,10 @@ const Navbar = () => {
           <button>Menu/Order</button>
         </div>
 
-        <div>
-          <p>About</p>
-          <p>Contact</p>
-          <p>Login</p>
+        <div className = "flex flex-col items-start">
+          <button>About</button>
+          <button>Contact</button>
+          <button>Login</button>
         </div>
 
         <div>CART</div>
