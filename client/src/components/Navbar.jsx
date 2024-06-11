@@ -1,5 +1,4 @@
 import React from "react";
-import mooncakeLogo from "../assets/mooncake-sample-logo.jpeg"
 
 const Navbar = () => {
   return (
@@ -7,7 +6,9 @@ const Navbar = () => {
       <div className="flex flex-col justify-between h-full">
 
         <div>
-          <button>LOGO</button>
+          <button>
+            <img src="/mooncake-sample-logo.jpeg" alt="Mooncake Logo"/>
+          </button>
         </div>
 
         <div>
@@ -21,7 +22,9 @@ const Navbar = () => {
         </div>
 
         <div>
-          <button>CART</button>
+          <button>
+            <img src="/cart-sample-logo.jpeg" alt="Cart Logo"/>
+          </button>
         </div>
 
         <div>
