@@ -5,6 +5,7 @@ const Navbar = () => {
   return (
     <div className="h-screen">
       <div className="flex flex-col justify-between h-full">
+
         <div>
           <button>LOGO</button>
         </div>
@@ -19,7 +20,9 @@ const Navbar = () => {
           <button>Login</button>
         </div>
 
-        <div>CART</div>
+        <div>
+          <button>CART</button>
+        </div>
 
         <div>
           <button>Translate</button>
