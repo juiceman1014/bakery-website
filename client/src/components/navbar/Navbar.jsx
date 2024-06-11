@@ -18,7 +18,10 @@ const Navbar = () => {
 
         <div>CART</div>
 
-        <div>Translate</div>
+        <div>
+          <button>Translate</button>
+        </div>
+
       </div>
     </div>
   );
