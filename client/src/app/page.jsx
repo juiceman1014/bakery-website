@@ -3,7 +3,6 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <div className="flex flex-col">
         <div>
           <video
             className="h-full w-full object-cover"
@@ -14,7 +13,6 @@ export default function Home() {
             loop
           ></video>
         </div>
-      </div>
     </>
   );
 }
