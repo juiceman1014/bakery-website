@@ -31,6 +31,10 @@ const Navbar = () => {
           <button>Translate</button>
         </div>
 
+        <div className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
+          <button>Anh Danh © 2024</button>
+        </div>
+
       </div>
     </div>
   );
