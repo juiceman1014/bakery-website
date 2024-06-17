@@ -15,7 +15,9 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>
         <div className="flex flex-row">
           <Navbar />
-          {children}
+          <div className = "pl-24">
+            {children}
+          </div>
         </div>
       </body>
     </html>
