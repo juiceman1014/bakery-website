@@ -1,6 +1,6 @@
 import React from "react";
 
-const login = () => {
+const Login = () => {
   return (
     <section class="bg-white">
       <div class="flex flex-col items-center justify-center px-6 py-8 mx-auto md:h-screen lg:py-0">
@@ -103,4 +103,4 @@ const login = () => {
   );
 };
 
-export default login;
+export default Login;
