@@ -38,11 +38,13 @@ const Navbar = () => {
 
         <div className="hover:bg-orange-200 p-2 rounded-full">
           <button>
-            <img
-              className="h-16 w-16 rounded-full"
-              src="/cart-sample-logo.jpeg"
-              alt="Cart Logo"
-            />
+            <Link href = "/checkout-methods">
+              <img
+                className="h-16 w-16 rounded-full"
+                src="/cart-sample-logo.jpeg"
+                alt="Cart Logo"
+              />
+            </Link>
           </button>
         </div>
 
