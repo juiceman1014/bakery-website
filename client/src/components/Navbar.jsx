@@ -1,17 +1,20 @@
 import React from "react";
 import Link from "next/link";
 
+
 const Navbar = () => {
   return (
     <div className="h-screen">
       <div className="flex flex-col justify-between h-full w-24 bg-orange-100 items-center py-4 fixed">
         <div className="hover:bg-orange-200 p-2 rounded-full">
           <button>
-            <img
-              className="h-16 w-16 rounded-full"
-              src="/mooncake-sample-logo.jpeg"
-              alt="Mooncake Logo"
-            />
+            <Link href="/">
+              <img
+                className="h-16 w-16 rounded-full"
+                src="/mooncake-sample-logo.jpeg"
+                alt="Mooncake Logo"
+              />
+           </Link>
           </button>
         </div>
 
