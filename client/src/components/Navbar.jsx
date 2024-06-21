@@ -1,7 +1,6 @@
 import React from "react";
 import Link from "next/link";
 
-
 const Navbar = () => {
   return (
     <div className="h-screen">
@@ -14,7 +13,7 @@ const Navbar = () => {
                 src="/mooncake-sample-logo.jpeg"
                 alt="Mooncake Logo"
               />
-           </Link>
+            </Link>
           </button>
         </div>
 
@@ -38,7 +37,7 @@ const Navbar = () => {
 
         <div className="hover:bg-orange-200 p-2 rounded-full">
           <button>
-            <Link href = "/checkout-methods">
+            <Link href="/cart">
               <img
                 className="h-16 w-16 rounded-full"
                 src="/cart-sample-logo.jpeg"
