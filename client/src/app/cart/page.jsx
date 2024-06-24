@@ -4,8 +4,8 @@ import Link from "next/link";
 const Cart = () => {
   return (
     <>
-       <div className="flex flex-row justify-center items-center h-screen">
-        <container className="flex flex-col justify-center items-center bg-orange-100 h-3/6 w-6/12 justify-evenly">
+       <div className="flex flex-row justify-center items-center h-screen break-normal">
+        <container className="flex flex-col justify-center items-center bg-orange-100 h-[500px] w-[500px] justify-evenly">
           
             <div className="h-1/6 w-6/12 bg-slate-100 flex flex-col justify-center">
               <div className = "flex justify-between">
