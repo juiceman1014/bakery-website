@@ -1,11 +1,55 @@
 import React from "react";
 
 const Pickup = () => {
-    return(
-        <div>
-            Delivery
-        </div>
-    );
+  return (
+    <>
+      <div className="flex flex-col justify-center items-center h-screen mt-[150px]">
+        <container className="flex flex-col justify-center items-start bg-orange-100 h-[500px] w-[500px] justify-evenly">
+          <div className="flex flex-col ml-[3rem]">
+            <p>Full Name: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>Email Address: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>Phone Number: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>State: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>City: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>Zip Code: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex flex-col ml-[3rem]">
+            <p>Address: </p>
+            <input className="w-[300px]"></input>
+          </div>
+
+          <div className="flex justify-end w-full pr-[3rem]">
+            <button className="bg-blue-500 text-white px-4 py-2 rounded">Submit</button>
+          </div>
+          
+        </container>
+
+        <img className="h-[300px] w-auto" src="/venmo-QR.jpg"></img>
+      </div>
+    </>
+  );
 };
 
-export default Pickup
+export default Pickup;
