@@ -25,12 +25,6 @@ const Navbar = () => {
 
         <div className="flex flex-col space-y-2">
           <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-            About
-          </button>
-          <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-            Contact
-          </button>
-          <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
             <Link href="/login">Login</Link>
           </button>
         </div>
