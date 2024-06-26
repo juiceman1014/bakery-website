@@ -4,6 +4,14 @@ export default function Home() {
   return (
     <>
       <container className="flex flex-col">
+        <div className = "flex flex-row justify-end">
+          <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
+            <Link href="#about">About</Link>
+          </button>
+          <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
+            Contact
+          </button>
+        </div>
         <video
           className="flex h-full w-full object-cover"
           src="/cake.mp4"
@@ -12,7 +20,7 @@ export default function Home() {
           muted
           loop
         ></video>
-        <about className="flex flex-row mt-10">
+        <about id="about" className="flex flex-row mt-10">
           <img src="/Baker.jpg" />
           <div className="flex flex-col justify-center w-full">
             <h1 className="font-bold text-center">our story</h1>
