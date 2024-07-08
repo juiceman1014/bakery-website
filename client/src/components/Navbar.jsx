@@ -19,7 +19,7 @@ const Navbar = () => {
 
         <div>
           <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-            Menu/Order
+            <Link href="/menu">Menu/Order</Link>
           </button>
         </div>
 
