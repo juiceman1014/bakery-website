@@ -52,6 +52,16 @@ export default function Home() {
             </p>
           </div>
         </about>
+
+        <contact className = "my-10 flex flex-row">
+          <div>
+            <h1 className="font-bold text-center">Contact Information</h1>
+          </div>
+          <div className = "ml-[10%]">
+            <h1>Email Address: emailname@gmail.com</h1>
+            <h1>Phone Number: 408-123-4567</h1>
+          </div>
+        </contact>
       </container>
     </>
   );
