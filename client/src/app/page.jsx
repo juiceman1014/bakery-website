@@ -23,7 +23,7 @@ export default function Home() {
         <about id="about" className="flex flex-row mt-10">
           <img src="/Baker.jpg" />
           <div className="flex flex-col justify-center w-full">
-            <h1 className="font-bold text-center">our story</h1>
+            <h1 className="font-bold text-center">About</h1>
             <p className="mt-10 ml-5">
               Lorem ipsum dolor sit amet consectetur adipisicing elit. Maxime
               mollitia, molestiae quas vel sint commodi repudiandae consequuntur
