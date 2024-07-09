@@ -9,7 +9,7 @@ export default function Home() {
             <Link href="#about">About</Link>
           </button>
           <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-            Contact
+          <Link href="#contact">Contact</Link>
           </button>
         </div>
         <video
@@ -53,7 +53,7 @@ export default function Home() {
           </div>
         </about>
 
-        <contact className = "my-10 flex flex-row">
+        <contact id = "contact" className = "my-10 flex flex-row">
           <div>
             <h1 className="font-bold text-center">Contact Information</h1>
           </div>
