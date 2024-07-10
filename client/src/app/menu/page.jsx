@@ -24,6 +24,15 @@ const menu = () => {
             </div>
             <button className = "pr-[20px] ml-auto">add to cart</button>
           </mooncake>
+          <mooncake className = "flex flex-row"> 
+            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
+            <div className = "flex flex-col justify-between">
+              <p>Name</p>
+              <p>Price</p>
+              <p>Description</p>
+            </div>
+            <button className = "pr-[20px] ml-auto">add to cart</button>
+          </mooncake>
         </mooncakecontainer>
       </container>
     </>
