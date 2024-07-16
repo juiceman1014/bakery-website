@@ -42,3 +42,5 @@ next-env.d.ts
 server/cred.py
 server/.venv
 
+server/__pycache__
+

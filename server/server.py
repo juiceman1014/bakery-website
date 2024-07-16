@@ -1,10 +1,12 @@
-from flask import Flask,jsonify
+from flask import Flask, request, jsonify, session
 from flask_mysqldb import MySQL
 from flask_cors import CORS 
-import cred
+import MySQLdb.cursors
+import cred #credential file DO NOT push
 
 #app instance
 app = Flask(__name__)
+app.secret_key = cred.secretkey
 CORS(app) #Cors policy so FE can fetch API 
 
 #DB connector
@@ -42,6 +44,23 @@ def testSQL():
     for result in data:
         json_data.append(dict(zip(column_names,result)))
     return jsonify(json_data)
+
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    username = data['email']
+    password = data['password']
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+    account = cursor.fetchone()
+    if account:
+        cursor.close()
+        return jsonify({'status': 'fail', 'message': 'Account already exists!'})
+    else:
+        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        mysql.connection.commit()
+        cursor.close()
+        return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
             
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
