@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { useState } from "react";
+import axios from 'axios';
 
 const Register = () => {
   const [email, setEmail] = useState("");
@@ -11,7 +12,7 @@ const Register = () => {
   const handleRegister = async () => {
     try {
       const response = await axios.post("http://localhost:8000/register", {
-        username,
+        email,
         password,
       });
       console.log(response.data);
