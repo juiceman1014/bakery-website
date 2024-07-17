@@ -40,7 +40,7 @@ next-env.d.ts
 /cred.py
 
 server/cred.py
-server/.venv
+server/env
 
 server/__pycache__
 
