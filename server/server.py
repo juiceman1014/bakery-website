@@ -48,16 +48,16 @@ def testSQL():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    username = data['email']
+    name = data['email']
     password = data['password']
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM users WHERE username = %s', (username,))
+    cursor.execute('SELECT * FROM users WHERE name = %s', (name,))
     account = cursor.fetchone()
     if account:
         cursor.close()
         return jsonify({'status': 'fail', 'message': 'Account already exists!'})
     else:
-        cursor.execute('INSERT INTO users (username, password) VALUES (%s, %s)', (username, password))
+        cursor.execute('INSERT INTO users (name, password) VALUES (%s, %s)', (name, password))
         mysql.connection.commit()
         cursor.close()
         return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
