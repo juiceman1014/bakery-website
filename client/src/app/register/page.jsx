@@ -89,6 +89,29 @@ const Register = () => {
                 <div className="flex items-start">
                   <div className="flex items-center h-5">
                     <input
+                      id="showPassword"
+                      aria-describedby="showPassword"
+                      type="checkbox"
+                      checked={showPassword}
+                      onChange={(e) => setShowPassword(e.target.checked)}
+                      className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:border-gray-600 dark:focus:ring-primary-600"
+                    />
+                  </div>
+                  <div className="ml-3 text-sm">
+                    <label
+                      htmlFor="showPassword"
+                      className="text-gray-500 dark:text-gray-300"
+                    >
+                      Show password
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between">
+                <div className="flex items-start">
+                  <div className="flex items-center h-5">
+                    <input
                       id="remember"
                       aria-describedby="remember"
                       type="checkbox"
