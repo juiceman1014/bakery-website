@@ -42,7 +42,7 @@ const Cart = () => {
 
           <div className="flex justify-between w-6/12">
             <Link
-              href="/checkout-methods/delivery"
+              href="/menu"
               className="bg-white flex justify-center"
             >
               <button>Order More</button>
