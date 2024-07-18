@@ -1,3 +1,4 @@
+import bcrypt
 from flask import Flask, request, jsonify, session
 from flask_mysqldb import MySQL
 from flask_cors import CORS 
@@ -50,14 +51,18 @@ def register():
     data = request.json
     name = data['email']
     password = data['password']
+
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+
     cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM users WHERE name = %s', (name,))
+    cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
     account = cursor.fetchone()
     if account:
         cursor.close()
         return jsonify({'status': 'fail', 'message': 'Account already exists!'})
     else:
-        cursor.execute('INSERT INTO users (name, password) VALUES (%s, %s)', (name, password))
+        cursor.execute('INSERT INTO User (name, password) VALUES (%s, %s)', (name, hashed_password.decode('utf-8')))
         mysql.connection.commit()
         cursor.close()
         return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
