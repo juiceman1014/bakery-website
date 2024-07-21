@@ -66,7 +66,27 @@ def register():
         mysql.connection.commit()
         cursor.close()
         return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
-            
+
+@app.route('/login', methods = ['POST'])
+def login():
+    data = request.json
+    email = data['email']
+    password = data['password']
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM User WHERE name = %s', (email,))
+    account = cursor.fetchone()
+    cursor.close()
+
+    if account:
+        stored_password = account[2]
+        if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
+            return jsonify({'status':'success', 'message': 'Login successful!'})
+        else:
+            return jsonify({'status':'fail', 'message': 'Incorrect password!'})
+    else:
+        return jsonify({'status':'fail', 'message': 'Account not found!'})
+
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
     
