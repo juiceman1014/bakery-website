@@ -1,8 +1,10 @@
 import bcrypt
-from flask import Flask, request, jsonify, session
+from flask import Flask, request, jsonify
 from flask_mysqldb import MySQL
 from flask_cors import CORS 
 import MySQLdb.cursors
+import jwt
+import datetime
 import cred #credential file DO NOT push
 
 #app instance
@@ -17,6 +19,27 @@ app.config['MYSQL_USER'] = cred.user
 app.config['MYSQL_PASSWORD'] = cred.password
 app.config['MYSQL_DB'] = cred.db
 mysql = MySQL(app)
+
+def encode_auth_token(user_id, user_email):
+    try:
+        payload = {
+            'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1),
+            'iat': datetime.datetime.now(datetime.UTC),
+            'sub': user_id,
+            'email': user_email
+        }
+        return jwt.encode(payload, app.secret_key, algorithm='HS256')
+    except Exception as e:
+        return e
+
+def decode_auth_token(auth_token):
+    try:
+        payload = jwt.decode(auth_token, app.secret_key, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return 'Signature expired. Please log in again.'
+    except jwt.InvalidTokenError:
+        return 'Invalid token. Please log in again.'
 
 #Route
 @app.route("/hello", methods=['GET'])
@@ -67,7 +90,7 @@ def register():
         cursor.close()
         return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
 
-@app.route('/login', methods = ['POST'])
+@app.route('/login', methods=['POST'])
 def login():
     data = request.json
     email = data['email']
@@ -81,12 +104,30 @@ def login():
     if account:
         stored_password = account[2]
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-            return jsonify({'status':'success', 'message': 'Login successful!'})
+            auth_token = encode_auth_token(account[0], email)
+            if auth_token:
+                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token})
         else:
-            return jsonify({'status':'fail', 'message': 'Incorrect password!'})
+            return jsonify({'status': 'fail', 'message': 'Incorrect password!'})
     else:
-        return jsonify({'status':'fail', 'message': 'Account not found!'})
+        return jsonify({'status': 'fail', 'message': 'Account not found!'})
+
+@app.route('/logout', methods=['POST'])
+def logout():
+    # Clients can simply discard the token on logout
+    return jsonify({'status': 'success', 'message': 'Logout successful!'})
+
+@app.route('/session', methods=['GET'])
+def session_status():
+    auth_token = request.headers.get('Authorization')
+    if auth_token:
+        payload = decode_auth_token(auth_token)
+        if isinstance(payload, str):
+            return jsonify({'loggedIn': False, 'message': payload})
+        else:
+            return jsonify({'loggedIn': True, 'user': payload['email']})
+    else:
+        return jsonify({'loggedIn': False})
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
-    
