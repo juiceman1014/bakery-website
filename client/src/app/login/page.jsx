@@ -1,24 +1,22 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import Link from "next/link";
-import axios from "axios";
+import { UserContext } from "../context/UserContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState("");
+  const { login } = useContext(UserContext); // Use login from UserContext
 
   const handleLogin = async (e) => {
     e.preventDefault(); // Prevent default form submission
     try {
-      const response = await axios.post("http://localhost:8000/login", {
-        email,
-        password,
-      });
-      console.log(response.data);
-      setMessage(response.data.message);
-      setMessageType(response.data.status);
+      await login(email, password); // Call login function from UserContext
+      setMessage("Login successful!");
+      setMessageType("success");
+      window.location.href = "/";;
     } catch (error) {
       console.error("There was an error signing in!", error);
       setMessage("There was an error signing in!");
