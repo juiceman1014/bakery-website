@@ -16,11 +16,11 @@ const Login = () => {
       await login(email, password); // Call login function from UserContext
       setMessage("Login successful!");
       setMessageType("success");
-      window.location.href = "/";;
+      window.location.href = "/";
     } catch (error) {
       console.error("There was an error signing in!", error);
-      setMessage("There was an error signing in!");
-      setMessageType("error"); // Set message type to error
+      setMessageType("error");
+      setMessage(error.message);
     }
   };
 

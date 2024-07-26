@@ -33,10 +33,10 @@ export const UserProvider = ({ children }) => {
         localStorage.setItem('auth_token', response.data.auth_token);
         setUser(email);
       } else {
-        console.error('Login failed:', response.data.message);
+        throw new Error(response.data.message);
       }
     } catch (error) {
-      console.error('Login error:', error);
+      throw error; // Rethrow the error to be caught by handleLogin
     }
   };
 
