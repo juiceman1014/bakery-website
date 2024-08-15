@@ -112,6 +112,7 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Account not found!'})
 
+#dont need?
 @app.route('/logout', methods=['POST'])
 def logout():
     # Clients can simply discard the token on logout
@@ -128,6 +129,20 @@ def session_status():
             return jsonify({'loggedIn': True, 'user': payload['email']})
     else:
         return jsonify({'loggedIn': False})
+    
+@app.route('/menu', methods=['GET'])
+def get_menu_items():
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM Menu')
+    column_names = [x[0] for x in cursor.description]
+    data = cursor.fetchall()
+    cursor.close()
+
+    json_data = []
+    for result in data:
+        json_data.append(dict(zip(column_names, result)))
+
+    return jsonify(json_data)
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
