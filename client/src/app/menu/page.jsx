@@ -1,7 +1,29 @@
-import React from "react";
+"use client";
+
+import React, { useEffect, useState} from "react";
+import axios from "axios";
 import Link from "next/link";
 
-const menu = () => {
+const Menu = () => {
+  const [mooncakes,setMooncakes] = useState([]);
+  const [cheesecakes, setCheesecakes] = useState([]);
+
+  useEffect(() => {
+    axios.get("http://localhost:8000/menu")
+      .then(response => {
+        const items = response.data;
+
+        const mooncakeItems = items.filter(item => item.category === "mooncake");
+        const cheesecakeItems = items.filter(item => item.category === 'cheesecake');
+
+        setMooncakes(mooncakeItems);
+        setCheesecakes(cheesecakeItems);
+      })
+      .catch(error => {
+        console.error("There was an error fetching the menu items!", error);
+      });
+  }, []);
+  
   return (
     <>
       <container className = "h-screen w-screen">
@@ -13,72 +35,44 @@ const menu = () => {
             <Link href="#cheesecake">Cheesecake</Link>
           </button>
         </div>
-        <h1 className = "text-2xl text-center">Mooncake</h1>
-        <mooncakecontainer id = "mooncake" className = "flex flex-col">
-          <mooncake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
-            </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </mooncake>
-          <mooncake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
-            </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </mooncake>
-          <mooncake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
-            </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </mooncake>
-          <mooncake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
-            </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </mooncake>
-        </mooncakecontainer>
 
-        <h1 className = "mt-[20px] text-2xl text-center">Cheesecake</h1>
-        <cheesecakecontainer id = "cheesecake" className = "flex flex-col">
-          <cheesecake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
+        <div id = "mooncake" className = "flex flex-col">
+          <h1 className = "text-2xl text-center">Mooncake</h1>
+          <div className = "flex flex-col"> 
+            {mooncakes.map(item => (
+              <div key = {item.ID} className = "flex flex-row my-4">
+              <img className = "h-[200px] w-auto" src={item.photo} alt={item.item_name}></img>
+              <div className = "flex flex-col justify-between">
+                <p>Name: {item.item_name}</p>
+                <p>Price: {item.price}</p>
+                <p>Description: {item.description}</p>
+              </div>
+              <button className = "pr-[20px] ml-auto">add to cart</button>
             </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </cheesecake>
-          <cheesecake className = "flex flex-row"> 
-            <img className = "h-[200px] w-auto" src="https://cdn.theatlantic.com/media/mt/science/cat_caviar.jpg"></img>
-            <div className = "flex flex-col justify-between">
-              <p>Name</p>
-              <p>Price</p>
-              <p>Description</p>
-            </div>
-            <button className = "pr-[20px] ml-auto">add to cart</button>
-          </cheesecake>
-        </cheesecakecontainer>
+            ))}
+          </div>
+        </div>
 
-        
+        <div id = "cheesecake" className = "flex flex-col">
+          <h1 className = "text-2xl text-center">Cheesecake</h1>
+          <div className = "flex flex-col"> 
+            {cheesecakes.map(item => (
+              <div key = {item.ID} className = "flex flex-row my-4">
+              <img className = "h-[200px] w-auto" src={item.photo} alt={item.item_name}></img>
+              <div className = "flex flex-col justify-between">
+                <p>Name: {item.item_name}</p>
+                <p>Price: {item.price}</p>
+                <p>Description: {item.description}</p>
+              </div>
+              <button className = "pr-[20px] ml-auto">add to cart</button>
+            </div>
+            ))}
+          </div>
+        </div>
+
       </container>
     </>
   );
 };
 
-export default menu;
+export default Menu;
