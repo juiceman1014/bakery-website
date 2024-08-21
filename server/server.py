@@ -144,5 +144,33 @@ def get_menu_items():
 
     return jsonify(json_data)
 
+@app.route('/cart', methods = ['POST'])
+def add_to_cart():
+    data = request.json
+    user_ID = data.get('user_ID')
+    item_ID = data.get('item_ID')
+    quantity = data.get('quantity', 1)
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
+    existing_item = cursor.fetchone()
+
+    if existing_item:
+        cursor.execute(
+            'UPDATE User_Cart SET quantity = quantity + %s WHERE user_ID = %s and item_ID = %s',
+            (quantity, user_ID, item_ID)
+        )
+    else:
+        cursor.execute(
+            'INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (%s, %s, %s)',
+            (user_ID, item_ID, quantity)
+        )
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
+
+
+
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
