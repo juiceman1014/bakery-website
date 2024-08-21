@@ -25,7 +25,7 @@ def encode_auth_token(user_id, user_email):
         payload = {
             'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1),
             'iat': datetime.datetime.now(datetime.UTC),
-            'sub': user_id,
+            'ID': user_id,
             'email': user_email
         }
         return jwt.encode(payload, app.secret_key, algorithm='HS256')
@@ -106,7 +106,7 @@ def login():
         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
             auth_token = encode_auth_token(account[0], email)
             if auth_token:
-                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token})
+                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token, 'user_ID': account[0]})
         else:
             return jsonify({'status': 'fail', 'message': 'Incorrect password!'})
     else:
@@ -126,7 +126,7 @@ def session_status():
         if isinstance(payload, str):
             return jsonify({'loggedIn': False, 'message': payload})
         else:
-            return jsonify({'loggedIn': True, 'user': payload['email']})
+            return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
     else:
         return jsonify({'loggedIn': False})
     
@@ -170,6 +170,8 @@ def add_to_cart():
 
     return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
 
+@app.route('/cart/<int:user_id>', methods=['GET'])
+def get_cart_items(user_ID):
 
 
 if __name__ == "__main__":
