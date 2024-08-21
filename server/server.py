@@ -172,6 +172,21 @@ def add_to_cart():
 
 @app.route('/cart/<int:user_id>', methods=['GET'])
 def get_cart_items(user_ID):
+    cursor = mysql.connection.cursor()
+    cursor.execute('''
+        SELECT UC.item_ID, M.item_name, M.price, UC.quantity
+        FROM User_Cart UC, Menu M
+        WHERE UC.item_ID = M.item_ID AND UC.user_ID = %s
+    ''', (user_ID, ))
+    column_names = [x[0] for x in cursor.description]
+    data = cursor.fetchall()
+    cursor.close()
+
+    json_data = []
+    for result in data:
+        json_data.append(dict(zip(column_names, result)))
+    
+    return jsonify(json_data)
 
 
 if __name__ == "__main__":
