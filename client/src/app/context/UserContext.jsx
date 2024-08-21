@@ -15,7 +15,10 @@ export const UserProvider = ({ children }) => {
             headers: { Authorization: token }
           });
           if (response.data.loggedIn) {
-            setUser(response.data.user);
+            setUser({
+              ID: response.data.user_ID,
+              email: response.data.user_email
+            });
           }
         } catch (error) {
           console.error('Session check failed:', error);
@@ -31,7 +34,10 @@ export const UserProvider = ({ children }) => {
       const response = await axios.post('http://localhost:8000/login', { email, password });
       if (response.data.status === 'success') {
         localStorage.setItem('auth_token', response.data.auth_token);
-        setUser(email);
+        setUser({
+          id: response.data.user_ID,
+          email: email
+        })
       } else {
         throw new Error(response.data.message);
       }
