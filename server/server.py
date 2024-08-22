@@ -170,13 +170,13 @@ def add_to_cart():
 
     return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
 
-@app.route('/cart/<int:user_id>', methods=['GET'])
+@app.route('/cart/<int:user_ID>', methods=['GET'])
 def get_cart_items(user_ID):
     cursor = mysql.connection.cursor()
     cursor.execute('''
         SELECT UC.item_ID, M.item_name, M.price, UC.quantity
         FROM User_Cart UC, Menu M
-        WHERE UC.item_ID = M.item_ID AND UC.user_ID = %s
+        WHERE UC.item_ID = M.ID AND UC.user_ID = %s
     ''', (user_ID, ))
     column_names = [x[0] for x in cursor.description]
     data = cursor.fetchall()
