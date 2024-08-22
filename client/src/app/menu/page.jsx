@@ -1,12 +1,14 @@
 "use client";
 
-import React, { useEffect, useState} from "react";
+import React, { useEffect, useState, useContext} from "react";
 import axios from "axios";
 import Link from "next/link";
+import { UserContext } from "../context/UserContext.jsx";
 
 const Menu = () => {
   const [mooncakes,setMooncakes] = useState([]);
   const [cheesecakes, setCheesecakes] = useState([]);
+  const { user } = useContext(UserContext);
 
   useEffect(() => {
     axios.get("http://localhost:8000/menu")
@@ -23,6 +25,39 @@ const Menu = () => {
         console.error("There was an error fetching the menu items!", error);
       });
   }, []);
+
+  const addToCart = (item) => {
+    if(user){
+      axios.post("http://localhost:8000/cart", {
+        user_ID: user.ID,
+        item_ID: item.ID,
+        quantity: 1
+      })
+      .then(response => {
+        alert(response.data.message);
+      })
+      .catch(error => {
+        console.error("There was an error adding the item ot the cart!", error);
+      });
+    } else{
+      let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
+      const existingItem = guestCart.find(cartItem => cartItem.ID === item.ID);
+
+      if(existingItem){
+        existingItem.quantity += 1;
+      }else{
+        guestCart.push({
+          ID: item.ID,
+          name: item.item_name,
+          price: item.price,
+          quantity: 1
+        });
+      }
+
+      localStorage.setItem('guest_cart', JSON.stringify(guestCart));
+      alert("Item added to cart!");
+    }
+  };
   
   return (
     <>
@@ -47,7 +82,7 @@ const Menu = () => {
                 <p>Price: {item.price}</p>
                 <p>Description: {item.description}</p>
               </div>
-              <button className = "pr-[20px] ml-auto">add to cart</button>
+              <button className = "pr-[20px] ml-auto" onClick = {() => addToCart(item)}>add to cart</button>
             </div>
             ))}
           </div>
@@ -64,7 +99,7 @@ const Menu = () => {
                 <p>Price: {item.price}</p>
                 <p>Description: {item.description}</p>
               </div>
-              <button className = "pr-[20px] ml-auto">add to cart</button>
+              <button className = "pr-[20px] ml-auto" onClick = {() => addToCart(item)}>add to cart</button>
             </div>
             ))}
           </div>
