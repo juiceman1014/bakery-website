@@ -11,8 +11,9 @@ const Menu = () => {
   const { user } = useContext(UserContext);
 
   useEffect(() => {
-    axios.get("http://localhost:8000/menu")
-      .then(response => {
+    const fetchMenuItems = async() => {
+      try{
+        const response = await axios.get("http://localhost:8000/menu")
         const items = response.data;
 
         const mooncakeItems = items.filter(item => item.category === "mooncake");
@@ -20,25 +21,26 @@ const Menu = () => {
 
         setMooncakes(mooncakeItems);
         setCheesecakes(cheesecakeItems);
-      })
-      .catch(error => {
+      } catch (error) {
         console.error("There was an error fetching the menu items!", error);
-      });
+      }
+    };
+    
+    fetchMenuItems();
   }, []);
 
-  const addToCart = (item) => {
+  const addToCart = async (item) => {
     if(user){
-      axios.post("http://localhost:8000/cart", {
-        user_ID: user.ID,
-        item_ID: item.ID,
-        quantity: 1
-      })
-      .then(response => {
+      try{
+        const response = await axios.post("http://localhost:8000/cart", {
+          user_ID: user.ID,
+          item_ID: item.ID,
+          quantity: 1
+        });
         alert(response.data.message);
-      })
-      .catch(error => {
-        console.error("There was an error adding the item ot the cart!", error);
-      });
+      } catch(error){
+        console.error("There was an error adding the item to the cart!", error);
+      }
     } else{
       let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
       const existingItem = guestCart.find(cartItem => cartItem.ID === item.ID);
@@ -48,7 +50,7 @@ const Menu = () => {
       }else{
         guestCart.push({
           ID: item.ID,
-          name: item.item_name,
+          item_name: item.item_name,
           price: item.price,
           quantity: 1
         });
