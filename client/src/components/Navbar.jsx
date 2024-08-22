@@ -35,7 +35,7 @@ const Navbar = () => {
         <div className="flex flex-col items-center space-y-2">
           {user ? (
             <>
-              <div className="rounded-md text-sm font-medium break-words w-20">{user}</div>
+              <div className="rounded-md text-sm font-medium break-words w-20">{user.email}</div>
               <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium" onClick={handleLogout}>
                 Logout
               </button>
