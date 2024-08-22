@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useContext } from "react";
 import Link from "next/link";
-import { UserContext } from "../context/UserContext";
+import { UserContext } from "../context/UserContext.jsx";
 
 const Login = () => {
   const [email, setEmail] = useState("");
