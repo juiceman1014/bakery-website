@@ -35,7 +35,7 @@ export const UserProvider = ({ children }) => {
       if (response.data.status === 'success') {
         localStorage.setItem('auth_token', response.data.auth_token);
         setUser({
-          id: response.data.user_ID,
+          ID: response.data.user_ID,
           email: email
         })
       } else {
