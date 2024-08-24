@@ -25,13 +25,30 @@ const Cart = () => {
     };
     
     fetchCartItems();
-  }, [user]);
+  }, [cartItems]);
 
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => total + (item.price * item.quantity), 0).toFixed(2);
   };
 
+  const handleDelete = async (item_ID) => {
+    if(user) {
+      try{
+        await axios.delete('http://localhost:8000/cart', {
+          params: {user_ID: user.ID, item_ID}
+        });
+      } catch(error){
+        console.error("There was an error deleting the cart item!", error);
+      }
+    } else {
+      const updatedCart = cartItems.filter(item => item.ID !== item_ID);
+      localStorage.setItem('guest_cart', JSON.stringify(updatedCart));
+      setCartItems(updatedCart);
+    }
+  }
+
   const total = calculateTotal();
+  
 
   return (
     <>
@@ -40,10 +57,16 @@ const Cart = () => {
           
           <div className="h-1/6 w-6/12 flex flex-col justify-center">
           {cartItems.map((item) => (
-            <div key = {item.ID} className="flex justify-between">
+            <div key = {item.item_ID} className="flex justify-between">
               <p>{item.item_name}</p>
               <p>{item.price}</p>
               <p>Quantity: {item.quantity}</p>
+              <button
+              onClick = {() => handleDelete(item.item_ID)}
+              className = "text-[red]"
+              >
+                X
+              </button>
             </div>
           ))}
         
