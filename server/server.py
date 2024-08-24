@@ -188,6 +188,21 @@ def get_cart_items(user_ID):
     
     return jsonify(json_data)
 
+@app.route('/cart', methods=['DELETE'])
+def delete_cart_item():
+    user_ID = request.args.get('user_ID')
+    item_ID = request.args.get('item_ID')
+
+    print(f"Received user_ID: {user_ID}")
+    print(f"Received item_ID: {item_ID}")
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'status': 'success', 'message':'Item removed from cart!'})
+
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
