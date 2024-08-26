@@ -6,6 +6,7 @@ import MySQLdb.cursors
 import jwt
 import datetime
 import cred #credential file DO NOT push
+from flask_mail import Mail, Message
 
 #app instance
 app = Flask(__name__)
@@ -19,6 +20,13 @@ app.config['MYSQL_USER'] = cred.user
 app.config['MYSQL_PASSWORD'] = cred.password
 app.config['MYSQL_DB'] = cred.db
 mysql = MySQL(app)
+
+app.config['MAIL_SERVER'] = cred.mail_server
+app.config['MAIL_PORT'] = cred.mail_port
+app.config['MAIL_USE_TLS'] = cred.mail_use_tls
+app.config['MAIL_USERNAME'] = cred.mail_username
+app.config['MAIL_PASSWORD'] = cred.mail_password
+mail = Mail(app)
 
 def encode_auth_token(user_id, user_email):
     try:
