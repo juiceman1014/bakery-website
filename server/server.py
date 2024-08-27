@@ -26,6 +26,7 @@ app.config['MAIL_PORT'] = cred.mail_port
 app.config['MAIL_USE_TLS'] = cred.mail_use_tls
 app.config['MAIL_USERNAME'] = cred.mail_username
 app.config['MAIL_PASSWORD'] = cred.mail_password
+app.config['MAIL_DEFAULT_SENDER'] = cred.mail_username
 mail = Mail(app)
 
 def encode_auth_token(user_id, user_email):
@@ -211,6 +212,42 @@ def delete_cart_item():
 
     return jsonify({'status': 'success', 'message':'Item removed from cart!'})
 
+@app.route('/submit-order-pickup', methods=['POST'])
+def submit_order_pickup():
+    data = request.json
+    cart_items = data.get('cartItems')
+    pickup_details = data.get('pickupDetails')
+
+    pickup_name = pickup_details.get('name')
+    pickup_email = pickup_details.get('email')
+    pickup_phone = pickup_details.get('phone')
+
+    cart_details = "\n    ".join(
+        [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
+    )
+
+    total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
+
+    email_body = f"""
+    Order Confirmation:
+
+    Pickup Details:
+    Name: {pickup_name}
+    Email: {pickup_email}
+    Phone: {pickup_phone}
+
+    Items Ordered: 
+    {cart_details}
+
+    Total Price: ${total_price:.2f}
+    """
+
+    msg = Message(f"Order Confirmation - {pickup_name}", recipients = [cred.email_recipient])
+    msg.body = email_body
+    mail.send(msg)
+    print(repr(cart_details))
+
+    return jsonify({"status": "success", "message": "Order placed successfully!"})
 
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
