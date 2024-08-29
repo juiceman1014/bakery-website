@@ -42,11 +42,19 @@ const Pickup = () => {
       const response = await axios.post("http://localhost:8000/submit-order-pickup", {
         user_ID: user ? user.ID : null,
         cartItems: cartItems,
-        pickupDetails, pickupDetails,
+        pickupDetails: pickupDetails,
       });
 
       if (response.data.status === "success"){
         alert("Order placed successfully!");
+          if(user){
+            await axios.delete("http://localhost:8000/cart-clear", {
+              params: {user_ID: user.ID}
+            });
+            
+          } else{
+            localStorage.removeItem("guest_cart");
+          }
       }
     } catch(error){
       console.error("Error placing order:", error);

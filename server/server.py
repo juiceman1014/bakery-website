@@ -249,5 +249,16 @@ def submit_order_pickup():
 
     return jsonify({"status": "success", "message": "Order placed successfully!"})
 
+@app.route('/cart-clear', methods=['DELETE'])
+def delete_cart():
+    user_ID = request.args.get('user_ID')
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s', (user_ID,))
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'status':'success', 'message':'All items removed from cart!'})
+
 if __name__ == "__main__":
     app.run(host="localhost", port=8000, debug=True)
