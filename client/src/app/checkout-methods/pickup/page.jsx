@@ -48,9 +48,7 @@ const Pickup = () => {
       if (response.data.status === "success"){
         alert("Order placed successfully!");
           if(user){
-            await axios.delete("http://localhost:8000/cart-clear", {
-              params: {user_ID: user.ID}
-            });
+            await axios.delete(`http://localhost:8000/cart-clear/${user.ID}`);
              window.location.href = "/cart"
           } else{
             localStorage.removeItem("guest_cart");

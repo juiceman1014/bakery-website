@@ -218,6 +218,8 @@ def submit_order_pickup():
     cart_items = data.get('cartItems')
     pickup_details = data.get('pickupDetails')
 
+    
+
     pickup_name = pickup_details.get('name')
     pickup_email = pickup_details.get('email')
     pickup_phone = pickup_details.get('phone')
@@ -249,10 +251,8 @@ def submit_order_pickup():
 
     return jsonify({"status": "success", "message": "Order placed successfully!"})
 
-@app.route('/cart-clear', methods=['DELETE'])
-def delete_cart():
-    user_ID = request.args.get('user_ID')
-
+@app.route('/cart-clear/<int:user_ID>', methods=['DELETE'])
+def delete_cart(user_ID):
     cursor = mysql.connection.cursor()
     cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s', (user_ID,))
     mysql.connection.commit()
