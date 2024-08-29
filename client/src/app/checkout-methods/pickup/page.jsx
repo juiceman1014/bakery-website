@@ -51,9 +51,10 @@ const Pickup = () => {
             await axios.delete("http://localhost:8000/cart-clear", {
               params: {user_ID: user.ID}
             });
-            
+             window.location.href = "/cart"
           } else{
             localStorage.removeItem("guest_cart");
+            window.location.href = "/cart";
           }
       }
     } catch(error){
