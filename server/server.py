@@ -218,7 +218,8 @@ def submit_order_pickup():
     cart_items = data.get('cartItems')
     pickup_details = data.get('pickupDetails')
 
-    
+    if not cart_items or len(cart_items) == 0:
+        return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
 
     pickup_name = pickup_details.get('name')
     pickup_email = pickup_details.get('email')
