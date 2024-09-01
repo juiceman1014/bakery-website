@@ -245,7 +245,55 @@ def submit_order_pickup():
     Total Price: ${total_price:.2f}
     """
 
-    msg = Message(f"Order Confirmation - {pickup_name}", recipients = [cred.email_recipient])
+    msg = Message(f"Pickup Order Confirmation - {pickup_name}", recipients = [cred.email_recipient])
+    msg.body = email_body
+    mail.send(msg)
+    print(repr(cart_details))
+
+    return jsonify({"status": "success", "message": "Order placed successfully!"})
+
+@app.route('/submit-order-delivery', methods=['POST'])
+def submit_order_delivery():
+    data = request.json
+    cart_items = data.get('cartItems')
+    delivery_details = data.get('deliveryDetails')
+
+    if not cart_items or len(cart_items) == 0:
+        return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
+
+    delivery_name = delivery_details.get('name')
+    delivery_email = delivery_details.get('email')
+    delivery_phone = delivery_details.get('phone')
+    delivery_state = delivery_details.get('state')
+    delivery_city = delivery_details.get('city')
+    delivery_zip_code = delivery_details.get('zipCode')
+    delivery_address = delivery_details.get('address')
+
+    cart_details = "\n    ".join(
+        [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
+    )
+
+    total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
+
+    email_body = f"""
+    Order Confirmation:
+
+    Delivery Details:
+    Name: {delivery_name}
+    Email: {delivery_email}
+    Phone: {delivery_phone}
+    State: {delivery_state}
+    City: {delivery_city}
+    Zip Code: {delivery_zip_code}
+    Address: {delivery_address}
+
+    Items Ordered: 
+    {cart_details}
+
+    Total Price: ${total_price:.2f}
+    """
+
+    msg = Message(f"Delivery Order Confirmation - {delivery_name}", recipients = [cred.email_recipient])
     msg.body = email_body
     mail.send(msg)
     print(repr(cart_details))
