@@ -30,12 +30,14 @@ const Menu = () => {
   }, []);
 
   const addToCart = async (item) => {
+    const today = new Date().toISOString().split('T')[0];
     if(user){
       try{
         const response = await axios.post("http://localhost:8000/cart", {
           user_ID: user.ID,
           item_ID: item.ID,
-          quantity: 1
+          quantity: 1,
+          order_date: today
         });
         alert(response.data.message);
       } catch(error){

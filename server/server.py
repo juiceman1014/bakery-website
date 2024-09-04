@@ -159,6 +159,7 @@ def add_to_cart():
     user_ID = data.get('user_ID')
     item_ID = data.get('item_ID')
     quantity = data.get('quantity', 1)
+    order_date = data.get('order_date')
 
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
@@ -171,8 +172,8 @@ def add_to_cart():
         )
     else:
         cursor.execute(
-            'INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (%s, %s, %s)',
-            (user_ID, item_ID, quantity)
+            'INSERT INTO User_Cart (user_ID, item_ID, quantity, order_date) VALUES (%s, %s, %s, %s)',
+            (user_ID, item_ID, quantity, order_date)
         )
     mysql.connection.commit()
     cursor.close()
