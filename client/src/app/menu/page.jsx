@@ -39,13 +39,13 @@ const Menu = () => {
             item_ID: item.ID,
             quantity: 1,
             order_date: today
-        }),
-        axios.post("http://localhost:8000/past-order", {
-          user_ID: user.ID,
-          item_ID: item.ID,
-          quantity: 1,
-          order_date: today
-        })
+          }),
+          axios.post("http://localhost:8000/past-order", {
+            user_ID: user.ID,
+            item_ID: item.ID,
+            quantity: 1,
+            order_date: today
+          })
       ]);
         alert(cartResponse.data.message);
         console.log("Past order added: ", pastOrderResponse.data.message);
