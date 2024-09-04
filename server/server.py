@@ -180,6 +180,33 @@ def add_to_cart():
 
     return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
 
+@app.route('/past-order', methods = ['POST'])
+def add_to_past_order():
+    data = request.json
+    user_ID = data.get('user_ID')
+    item_ID = data.get('item_ID')
+    quantity = data.get('quantity', 1)
+    order_date = data.get('order_date')
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('SELECT * FROM User_Past_Order WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
+    existing_item = cursor.fetchone()
+
+    if existing_item:
+        cursor.execute(
+            'UPDATE User_Past_Order SET quantity = quantity + %s WHERE user_ID = %s and item_ID = %s',
+            (quantity, user_ID, item_ID)
+        )
+    else:
+        cursor.execute(
+            'INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_date) VALUES (%s, %s, %s, %s)',
+            (user_ID, item_ID, quantity, order_date)
+        )
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
+
 @app.route('/cart/<int:user_ID>', methods=['GET'])
 def get_cart_items(user_ID):
     cursor = mysql.connection.cursor()
@@ -208,6 +235,21 @@ def delete_cart_item():
 
     cursor = mysql.connection.cursor()
     cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
+    mysql.connection.commit()
+    cursor.close()
+
+    return jsonify({'status': 'success', 'message':'Item removed from cart!'})
+
+@app.route('/past-order', methods=['DELETE'])
+def delete_cart_item_past():
+    user_ID = request.args.get('user_ID')
+    item_ID = request.args.get('item_ID')
+
+    print(f"Received user_ID: {user_ID}")
+    print(f"Received item_ID: {item_ID}")
+
+    cursor = mysql.connection.cursor()
+    cursor.execute('DELETE FROM User_Past_Order WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
     mysql.connection.commit()
     cursor.close()
 
