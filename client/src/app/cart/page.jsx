@@ -35,9 +35,14 @@ const Cart = () => {
     console.log("deleting item with ID " + item_ID);
     if(user) {
       try{
-        await axios.delete('http://localhost:8000/cart', {
-          params: {user_ID: user.ID, item_ID}
-        });
+        await Promise.all([
+          axios.delete('http://localhost:8000/cart', {
+            params: {user_ID: user.ID, item_ID}
+          }),
+          axios.delete('http://localhost:8000/past-order', {
+            params: {user_ID: user.ID, item_ID}
+          })
+      ]);
         const response = await axios.get(`http://localhost:8000/cart/${user.ID}`);
         setCartItems(response.data);
       } catch(error){
