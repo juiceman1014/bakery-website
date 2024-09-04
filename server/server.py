@@ -225,6 +225,24 @@ def get_cart_items(user_ID):
     
     return jsonify(json_data)
 
+@app.route('/past-order/<int:user_ID>', methods=['GET'])
+def get_past_order(user_ID):
+    cursor = mysql.connection.cursor()
+    cursor.execute('''
+        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, PO.order_date
+        FROM User_Past_Order PO, Menu M
+        WHERE PO.item_ID = M.ID AND PO.user_ID = %s
+    ''', (user_ID, ))
+    column_names = [x[0] for x in cursor.description]
+    data = cursor.fetchall()
+    cursor.close()
+
+    json_data = []
+    for result in data:
+        json_data.append(dict(zip(column_names, result)))
+    
+    return jsonify(json_data)
+
 @app.route('/cart', methods=['DELETE'])
 def delete_cart_item():
     user_ID = request.args.get('user_ID')
