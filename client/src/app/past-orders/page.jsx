@@ -5,45 +5,74 @@ import { UserContext } from "../context/UserContext.jsx";
 import axios from "axios";
 
 const PastOrders = () => {
-    const{user} = useContext(UserContext);
-    const[orders, setOrders] = useState([]);
+  const { user } = useContext(UserContext);
+  const [orders, setOrders] = useState([]);
+  const [groupedOrders, setGroupedOrders] = useState({});
 
-    useEffect(() => {
-        const fetchPastOrders = async () => {
-            if(user){
-                try{
-                    const response = await axios.get(`http://localhost:8000/past-order/${user.ID}`);
-                    setOrders(response.data);
-                } catch(error){
-                    console.error("Error fetching past orders: ", error);
-                }
+  useEffect(() => {
+    const fetchPastOrders = async () => {
+      if (user) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8000/past-order/${user.ID}`
+          );
+          console.log("Fetched orders:", response.data);
+          setOrders(response.data);
+
+          const grouped = response.data.reduce((acc, order) => {
+            const { order_ID } = order;
+            if (!acc[order_ID]) {
+              acc[order_ID] = [];
             }
-        };
-        fetchPastOrders();
-    }, [user]);
+            acc[order_ID].push(order);
+            return acc;
+          }, {});
 
-    if(!user){
-        return<div>Please log in to start tracking past orders.</div>
-    }
+          console.log("Grouped orders:", grouped);
+          setGroupedOrders(grouped);
+        } catch (error) {
+          console.error("Error fetching past orders: ", error);
+        }
+      }
+    };
+    fetchPastOrders();
+  }, [user]);
 
-    return(
-        <>
-            <h1 className = "text-center">Past Orders</h1>
-            <div className = "h-screen flex flex-col justify-evenly">
-                {orders.length === 0 ? (
-                    <div>No past orders found.</div>
-                ) : (
-                    orders.map((order, index) => (
-                        <div key = {index} className = "border-[2px] border-[black]">
-                            <div>Item: {order.item_name}</div>
-                            <div>Quantity: {order.quantity}</div>
-                            <div>Date: {new Date(order.order_date).toLocaleDateString()}</div>
-                        </div>
-                    ))
-                )}
+  if (!user) {
+    return <div>Please log in to start tracking past orders.</div>;
+  }
+
+  return (
+    <>
+      <h1 className="text-center">Past Orders</h1>
+      <div className="h-screen flex flex-col items-center justify-evenly">
+        {Object.keys(groupedOrders).length === 0 ? (
+          <div>No past orders found.</div>
+        ) : (
+          Object.keys(groupedOrders).map((orderID) => (
+            <div key={orderID} className="border-[2px] border-[black] p-4 mb-4">
+              <h2>
+                Order Date:{" "}
+                {new Date(
+                  groupedOrders[orderID][0].order_date
+                ).toLocaleDateString()}
+              </h2>
+
+              {groupedOrders[orderID].map((item, index) => (
+                <div
+                  key={index}
+                  className="border-t-[1px] border-[gray] mt-2 pt-2"
+                >
+                  <div>Item: {item.item_name}</div>
+                  <div>Quantity: {item.quantity}</div>
+                </div>
+              ))}
             </div>
-        </>
-    );
+          ))
+        )}
+      </div>
+    </>
+  );
 };
 
-export default PastOrders
+export default PastOrders;
