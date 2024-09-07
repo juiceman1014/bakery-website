@@ -204,7 +204,7 @@ def get_past_order(user_ID):
     cursor.execute('''
         SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date
         FROM User_Past_Order PO, Menu M, Order O
-        WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.user_ID = O.user_ID
+        WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.order_ID = O.ID
     ''', (user_ID, ))
     column_names = [x[0] for x in cursor.description]
     data = cursor.fetchall()
