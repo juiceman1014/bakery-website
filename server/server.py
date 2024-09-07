@@ -202,7 +202,7 @@ def get_past_order(user_ID):
     cursor = mysql.connection.cursor()
     cursor.execute('''
         SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
-        FROM User_Past_Order PO, Menu M, Order O
+        FROM User_Past_Order PO, Menu M, Orders O
         WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.order_ID = O.ID
     ''', (user_ID, ))
     column_names = [x[0] for x in cursor.description]
@@ -338,13 +338,13 @@ def fill_past_order():
         for item in cart_items:
             cursor.execute('''
                 INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID)
-                VALUES (%s, %s, %s, %s)
-                ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)      
-            ''', (user_ID, item['item_ID'], item['quantity'], order_ID))
+                VALUES (%s, %s, %s, %s)    
+            ''', (user_ID, item['ID'], item['quantity'], order_ID))
 
         mysql.connection.commit()
 
         cursor.close()
+        return jsonify({"status": "success", "message": "Order placed successfully!"})
 
     except Exception as e:
         mysql.connection.rollback()
