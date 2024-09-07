@@ -33,22 +33,12 @@ const Menu = () => {
     const today = new Date().toISOString().split('T')[0];
     if(user){
       try{
-        const [cartResponse, pastOrderResponse] = await Promise.all([
-          axios.post("http://localhost:8000/cart", {
+        const response = await axios.post("http://localhost:8000/cart", {
             user_ID: user.ID,
             item_ID: item.ID,
-            quantity: 1,
-            order_date: today
-          }),
-          axios.post("http://localhost:8000/past-order", {
-            user_ID: user.ID,
-            item_ID: item.ID,
-            quantity: 1,
-            order_date: today
-          })
-      ]);
-        alert(cartResponse.data.message);
-        console.log("Past order added: ", pastOrderResponse.data.message);
+            quantity: 1
+          });
+        alert(response.data.message);
       } catch(error){
         console.error("There was an error adding the item to the cart and psat orders!", error);
       }
