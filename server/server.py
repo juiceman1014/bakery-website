@@ -159,7 +159,6 @@ def add_to_cart():
     user_ID = data.get('user_ID')
     item_ID = data.get('item_ID')
     quantity = data.get('quantity', 1)
-    order_date = data.get('order_date')
 
     cursor = mysql.connection.cursor()
     cursor.execute('SELECT * FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
@@ -172,8 +171,8 @@ def add_to_cart():
         )
     else:
         cursor.execute(
-            'INSERT INTO User_Cart (user_ID, item_ID, quantity, order_date) VALUES (%s, %s, %s, %s)',
-            (user_ID, item_ID, quantity, order_date)
+            'INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (%s, %s, %s)',
+            (user_ID, item_ID, quantity)
         )
     mysql.connection.commit()
     cursor.close()
@@ -202,7 +201,7 @@ def get_cart_items(user_ID):
 def get_past_order(user_ID):
     cursor = mysql.connection.cursor()
     cursor.execute('''
-        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date
+        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
         FROM User_Past_Order PO, Menu M, Order O
         WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.order_ID = O.ID
     ''', (user_ID, ))
@@ -276,7 +275,7 @@ def submit_order_delivery():
     data = request.json
     cart_items = data.get('cartItems')
     delivery_details = data.get('deliveryDetails')
-
+    
     if not cart_items or len(cart_items) == 0:
         return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
 
@@ -318,6 +317,40 @@ def submit_order_delivery():
     print(repr(cart_details))
 
     return jsonify({"status": "success", "message": "Order placed successfully!"})
+
+@app.route('/fill-past-order', methods = ['POST'])
+def fill_past_order():
+
+    data = request.json
+    cart_items = data.get('cartItems')
+    user_ID = data.get('user_ID')
+    order_date = data.get('order_date')
+
+    try:
+        cursor = mysql.connection.cursor()
+
+        cursor.execute('''
+            INSERT INTO Orders (user_ID, order_date)   
+            VALUES(%s, %s)            
+        ''', (user_ID, order_date))
+        order_ID = cursor.lastrowid
+
+        for item in cart_items:
+            cursor.execute('''
+                INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID)
+                VALUES (%s, %s, %s, %s)
+                ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)      
+            ''', (user_ID, item['item_ID'], item['quantity'], order_ID))
+
+        mysql.connection.commit()
+
+        cursor.close()
+
+    except Exception as e:
+        mysql.connection.rollback()
+        print("Error processing order: ", str(e))
+        return jsonify({"status": "error", "message":"There was an issue placing your order."})
+
 
 @app.route('/cart-clear/<int:user_ID>', methods=['DELETE'])
 def delete_cart(user_ID):
