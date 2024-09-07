@@ -202,9 +202,9 @@ def get_cart_items(user_ID):
 def get_past_order(user_ID):
     cursor = mysql.connection.cursor()
     cursor.execute('''
-        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, PO.order_date
-        FROM User_Past_Order PO, Menu M
-        WHERE PO.item_ID = M.ID AND PO.user_ID = %s
+        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date
+        FROM User_Past_Order PO, Menu M, Order O
+        WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.user_ID = O.user_ID
     ''', (user_ID, ))
     column_names = [x[0] for x in cursor.description]
     data = cursor.fetchall()
