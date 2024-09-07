@@ -23,6 +23,7 @@ const Pickup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const today = new Date().toISOString().split('T')[0];
 
     let cartItems = [];
 
@@ -39,11 +40,21 @@ const Pickup = () => {
     }
 
     try{
-      const response = await axios.post("http://localhost:8000/submit-order-delivery", {
+      const [submitOrderResponse, fillPastOrderResponse] = await Promise.all([
+
+        axios.post("http://localhost:8000/submit-order-delivery", {
         user_ID: user ? user.ID : null,
         cartItems: cartItems,
         deliveryDetails: deliveryDetails,
-      });
+        }),
+
+        axios.post("http://localhost:8000/fill-past-order", {
+          user_ID: user ? user.ID : null,
+          cartItems: cartItems,
+          order_date: today
+        })
+
+      ]);
 
       if (response.data.status === "success"){
         alert("Order placed successfully!");
