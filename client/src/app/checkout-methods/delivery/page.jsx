@@ -56,7 +56,7 @@ const Pickup = () => {
 
       ]);
 
-      if (response.data.status === "success"){
+      if (submitOrderResponse.data.status === "success" && fillPastOrderResponse.data.status === "success"){
         alert("Order placed successfully!");
           if(user){
             await axios.delete(`http://localhost:8000/cart-clear/${user.ID}`);
@@ -65,8 +65,10 @@ const Pickup = () => {
             localStorage.removeItem("guest_cart");
             window.location.href = "/cart";
           }
-      }else if(response.data.status === "error"){
-        alert(response.data.message);
+      }else if(submitOrderResponse.data.status === "error"){
+        alert(submitOrderResponse.data.message);
+      }else if(fillPastOrderResponse.data.status === "error"){
+        alert(fillPastOrderResponse.data.message);
       }
     } catch(error){
       console.error("Error placing order:", error);
