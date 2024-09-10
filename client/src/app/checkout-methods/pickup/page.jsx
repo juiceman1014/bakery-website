@@ -65,8 +65,10 @@ const Pickup = () => {
             localStorage.removeItem("guest_cart");
             window.location.href = "/cart";
           }
-      }else if(response.data.status === "error"){
-        alert(response.data.message);
+      }else if(submitOrderResponse.data.status === "error"){
+        alert(submitOrderResponse.data.message);
+      }else if(fillPastOrderResponse.data.status === "error"){
+        alert(fillPastOrderResponse.data.message);
       }
     } catch(error){
       console.error("Error placing order:", error);
