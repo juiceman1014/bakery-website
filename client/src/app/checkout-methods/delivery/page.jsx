@@ -56,7 +56,7 @@ const Pickup = () => {
 
       ]);
 
-      if (submitOrderResponse.data.status === "success" && fillPastOrderResponse.data.status === "success"){
+      if (submitOrderResponse.data.status === "success"){
         alert("Order placed successfully!");
           if(user){
             await axios.delete(`http://localhost:8000/cart-clear/${user.ID}`);
