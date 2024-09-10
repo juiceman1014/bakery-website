@@ -80,7 +80,7 @@ const Pickup = () => {
         className="flex flex-col justify-center items-start bg-orange-100 h-[500px] w-[500px] justify-evenly"
         >
           <div className="flex flex-col ml-[3rem]">
-            <p>Pickup Name: </p>
+            <p>Delivery Name: </p>
             <input 
             className="w-[300px]"
             name="name"
