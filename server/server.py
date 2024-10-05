@@ -362,4 +362,4 @@ def delete_cart(user_ID):
     return jsonify({'status':'success', 'message':'All items removed from cart!'})
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)
