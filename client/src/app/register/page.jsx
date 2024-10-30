@@ -13,7 +13,7 @@ const Register = () => {
   const handleRegister = async (e) => {
     e.preventDefault(); // Prevent default form submission
     try {
-      const response = await axios.post("http://localhost:8000/register", {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/register`, {
         email,
         password,
       });

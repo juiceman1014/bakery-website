@@ -13,7 +13,7 @@ const Cart = () => {
     const fetchCartItems = async() => {
       if (user) {
         try{
-          const response = await axios.get(`http://localhost:8000/cart/${user.ID}`);
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart/${user.ID}`);
           setCartItems(response.data);
         } catch(error){
           console.error("There was an error fetching the cart items!", error);
@@ -35,10 +35,10 @@ const Cart = () => {
     console.log("deleting item with ID " + item_ID);
     if(user) {
       try{
-        await axios.delete('http://localhost:8000/cart', {
+        await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`, {
           params: {user_ID: user.ID, item_ID}
         });
-        const response = await axios.get(`http://localhost:8000/cart/${user.ID}`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart/${user.ID}`);
         setCartItems(response.data);
       } catch(error){
         console.error("There was an error deleting the cart item!", error);

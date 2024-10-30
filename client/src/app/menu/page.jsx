@@ -13,7 +13,7 @@ const Menu = () => {
   useEffect(() => {
     const fetchMenuItems = async() => {
       try{
-        const response = await axios.get("http://localhost:8000/menu")
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/menu`)
         const items = response.data;
 
         const mooncakeItems = items.filter(item => item.category === "mooncake");
@@ -33,7 +33,7 @@ const Menu = () => {
     
     if(user){
       try{
-        const response = await axios.post("http://localhost:8000/cart", {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`, {
             user_ID: user.ID,
             item_ID: item.ID,
             quantity: 1
