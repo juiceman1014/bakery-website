@@ -14,7 +14,7 @@ const PastOrders = () => {
       if (user) {
         try {
           const response = await axios.get(
-            `http://localhost:8000/past-order/${user.ID}`
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/past-order/${user.ID}`
           );
           console.log("Fetched orders:", response.data);
           setOrders(response.data);

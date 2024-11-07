@@ -29,7 +29,7 @@ const Pickup = () => {
 
     if(user){
       try{
-        const response = await axios.get(`http://localhost:8000/cart/${user.ID}`);
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart/${user.ID}`);
         cartItems = response.data;
       }catch(error){
         console.error("Error fetching user cart:", error);
@@ -42,13 +42,13 @@ const Pickup = () => {
     try{
       const [submitOrderResponse, fillPastOrderResponse] = await Promise.all([
 
-        axios.post("http://localhost:8000/submit-order-pickup", {
+        axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/submit-order-pickup`, {
         user_ID: user ? user.ID : null,
         cartItems: cartItems,
         pickupDetails: pickupDetails
         }),
 
-        axios.post("http://localhost:8000/fill-past-order", {
+        axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fill-past-order`, {
           user_ID: user ? user.ID : null,
           cartItems: cartItems,
           order_date: today
@@ -59,7 +59,7 @@ const Pickup = () => {
       if (submitOrderResponse.data.status === "success"){
         alert("Order placed successfully!");
           if(user){
-            await axios.delete(`http://localhost:8000/cart-clear/${user.ID}`);
+            await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart-clear/${user.ID}`);
              window.location.href = "/cart"
           } else{
             localStorage.removeItem("guest_cart");

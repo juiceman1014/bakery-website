@@ -11,7 +11,7 @@ export const UserProvider = ({ children }) => {
       const token = localStorage.getItem('auth_token');
       if (token) {
         try {
-          const response = await axios.get('http://localhost:8000/session', {
+          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/session`, {
             headers: { Authorization: token }
           });
           if (response.data.loggedIn) {
@@ -31,7 +31,7 @@ export const UserProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const response = await axios.post('http://localhost:8000/login', { email, password });
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/login`, { email, password });
       if (response.data.status === 'success') {
         localStorage.setItem('auth_token', response.data.auth_token);
         setUser({
