@@ -130,8 +130,11 @@ def logout():
 @app.route('/session', methods=['GET'])
 def session_status():
     auth_token = request.headers.get('Authorization')
+    print(f"Received Token: {auth_token}")
+    
     if auth_token:
         payload = decode_auth_token(auth_token)
+        print(f"Decoded Payload: {payload}")
         if isinstance(payload, str):
             return jsonify({'loggedIn': False, 'message': payload})
         else:
@@ -362,4 +365,4 @@ def delete_cart(user_ID):
     return jsonify({'status':'success', 'message':'All items removed from cart!'})
 
 if __name__ == "__main__":
-    app.run(host="localhost", port=8000, debug=True)
+    app.run(host="0.0.0.0", port=8000, debug=True)
