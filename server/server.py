@@ -25,13 +25,37 @@ CORS(app) #Cors policy so FE can fetch API
 # Define a Model
 class Menu(db.Model):
     __tablename__ = 'Menu'  # Match the existing table name
-    id = db.Column(db.Integer, primary_key=True)
+    ID = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String(100), nullable=False)
     photo = db.Column(db.String(100), nullable=False)
     price = db.Column(db.String(100), nullable=False)
     category = db.Column(db.String(100), nullable=False)
     description = db.Column(db.String(100), nullable=False)
 
+class User(db.Model):
+    __tablename__ = 'User'  # Match the existing table name
+    ID = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+class Orders(db.Model):
+    __tablename__ = 'Orders'  # Match the existing table name
+    ID = db.Column(db.Integer, primary_key=True)
+    user_ID = db.Column(db.String(100), nullable=False)
+    order_date = db.Column(db.String(100), nullable=False)
+    
+class User_Past_Order(db.Model):
+    __tablename__ = 'User_Past_Order'  # Match the existing table name
+    user_ID = db.Column(db.Integer, primary_key=True)
+    item_ID = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(100), nullable=False)
+    order_ID = db.Column(db.String(100), nullable=False)
+    
+class User_Cart(db.Model):
+    __tablename__ = 'User_Cart'  # Match the existing table name
+    user_ID = db.Column(db.Integer, primary_key=True)
+    item_ID = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(100), nullable=False)
 #Test SQLAlchemy 
 @app.route('/menu', methods=['GET'])
 def get_menu():
