@@ -127,14 +127,14 @@ def register():
      # Check if the user already exists
     existing_user = User.query.filter_by(name=name).first()
     if existing_user:
-        return jsonify({'status': 'fail', 'message': 'Account already exists!'})
+        return jsonify({'status': 'fail', 'message': 'Account already exists!'}), 400
     
     # Create new user
     new_user = User(name=name, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
+    return jsonify({'status': 'success', 'message': 'You have successfully registered!'}), 201
 
     # cursor = mysql.connection.cursor()
     # cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
