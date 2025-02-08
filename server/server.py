@@ -118,35 +118,23 @@ def get_menu():
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    name = data['email']
+    email = data['email']
     password = data['password']
 
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     
      # Check if the user already exists
-    existing_user = User.query.filter_by(name=name).first()
+    existing_user = User.query.filter_by(name=email).first()
     if existing_user:
         return jsonify({'status': 'fail', 'message': 'Account already exists!'}), 400
     
     # Create new user
-    new_user = User(name=name, password=hashed_password)
+    new_user = User(name=email, password=hashed_password)
     db.session.add(new_user)
     db.session.commit()
 
     return jsonify({'status': 'success', 'message': 'You have successfully registered!'}), 201
-
-    # cursor = mysql.connection.cursor()
-    # cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
-    # account = cursor.fetchone()
-    # if account:
-    #     cursor.close()
-    #     return jsonify({'status': 'fail', 'message': 'Account already exists!'})
-    # else:
-    #     cursor.execute('INSERT INTO User (name, password) VALUES (%s, %s)', (name, hashed_password.decode('utf-8')))
-    #     mysql.connection.commit()
-    #     cursor.close()
-    #     return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
 
 # @app.route('/login', methods=['POST'])
 # def login():
