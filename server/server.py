@@ -1,13 +1,11 @@
-# import bcrypt
+import bcrypt
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
-# from flask_mysqldb import MySQL
 from flask_cors import CORS 
-# import MySQLdb.cursors
-# import jwt
-# import datetime
+import jwt
+import datetime
 import cred #credential file DO NOT push
-# from flask_mail import Mail, Message
+from flask_mail import Mail, Message
 
 #app instance
 app = Flask(__name__)
@@ -20,12 +18,20 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Initialize SQLAlchemy
 db = SQLAlchemy(app)
 
+app.config['MAIL_SERVER'] = cred.mail_server
+app.config['MAIL_PORT'] = cred.mail_port
+app.config['MAIL_USE_TLS'] = cred.mail_use_tls
+app.config['MAIL_USERNAME'] = cred.mail_username
+app.config['MAIL_PASSWORD'] = cred.mail_password
+app.config['MAIL_DEFAULT_SENDER'] = cred.mail_username
+mail = Mail(app)
+
 CORS(app) #Cors policy so FE can fetch API 
 
-# Define a Model
+# Start define a Model for SQLALchemy
 class Menu(db.Model):
     __tablename__ = 'Menu'  # Match the existing table name
-    ID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     item_name = db.Column(db.String(100), nullable=False)
     photo = db.Column(db.String(100), nullable=False)
     price = db.Column(db.String(100), nullable=False)
@@ -34,13 +40,13 @@ class Menu(db.Model):
 
 class User(db.Model):
     __tablename__ = 'User'  # Match the existing table name
-    ID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
     password = db.Column(db.String(100), nullable=False)
 
 class Orders(db.Model):
     __tablename__ = 'Orders'  # Match the existing table name
-    ID = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     user_ID = db.Column(db.String(100), nullable=False)
     order_date = db.Column(db.String(100), nullable=False)
     
@@ -56,7 +62,43 @@ class User_Cart(db.Model):
     user_ID = db.Column(db.Integer, primary_key=True)
     item_ID = db.Column(db.String(100), nullable=False)
     quantity = db.Column(db.String(100), nullable=False)
-#Test SQLAlchemy 
+# End define a Model for SQLALchemy
+
+#Start Login mechanism
+def encode_auth_token(user_id, user_email):
+    try:
+        payload = {
+            'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1),
+            'iat': datetime.datetime.now(datetime.UTC),
+            'ID': user_id,
+            'email': user_email
+        }
+        return jwt.encode(payload, app.secret_key, algorithm='HS256')
+    except Exception as e:
+        return e
+
+def decode_auth_token(auth_token):
+    try:
+        payload = jwt.decode(auth_token, app.secret_key, algorithms=['HS256'])
+        return payload
+    except jwt.ExpiredSignatureError:
+        return 'Signature expired. Please log in again.'
+    except jwt.InvalidTokenError:
+        return 'Invalid token. Please log in again.'
+#End Login mechanism
+
+#Route
+@app.route("/hello", methods=['GET'])
+def home():
+    return jsonify([{
+        'name':"Kaisa",
+        'age' :"20"
+    },
+    {
+        'name':"Danh",
+        'age' :"25"
+    }])
+
 @app.route('/menu', methods=['GET'])
 def get_menu():
     menus = Menu.query.all()
@@ -72,92 +114,39 @@ def get_menu():
         for menu in menus
     ]
     return jsonify(menu_list)
-
-# #DB connector
-# app.config['MYSQL_HOST'] = cred.host
-# app.config['MYSQL_PORT'] = cred.port
-# app.config['MYSQL_USER'] = cred.user
-# app.config['MYSQL_PASSWORD'] = cred.password
-# app.config['MYSQL_DB'] = cred.db
-# mysql = MySQL(app)
-
-# app.config['MAIL_SERVER'] = cred.mail_server
-# app.config['MAIL_PORT'] = cred.mail_port
-# app.config['MAIL_USE_TLS'] = cred.mail_use_tls
-# app.config['MAIL_USERNAME'] = cred.mail_username
-# app.config['MAIL_PASSWORD'] = cred.mail_password
-# app.config['MAIL_DEFAULT_SENDER'] = cred.mail_username
-# mail = Mail(app)
-
-# def encode_auth_token(user_id, user_email):
-#     try:
-#         payload = {
-#             'exp': datetime.datetime.now(datetime.UTC) + datetime.timedelta(days=1),
-#             'iat': datetime.datetime.now(datetime.UTC),
-#             'ID': user_id,
-#             'email': user_email
-#         }
-#         return jwt.encode(payload, app.secret_key, algorithm='HS256')
-#     except Exception as e:
-#         return e
-
-# def decode_auth_token(auth_token):
-#     try:
-#         payload = jwt.decode(auth_token, app.secret_key, algorithms=['HS256'])
-#         return payload
-#     except jwt.ExpiredSignatureError:
-#         return 'Signature expired. Please log in again.'
-#     except jwt.InvalidTokenError:
-#         return 'Invalid token. Please log in again.'
-
-#Route
-@app.route("/hello", methods=['GET'])
-def home():
-    return jsonify([{
-        'name':"Kaisa",
-        'age' :"20"
-    },
-    {
-        'name':"Danh",
-        'age' :"25"
-    }])
        
-# @app.route("/test", methods=['GET'])
-# def testSQL():
-#     #Creating a connection cursor
-#     cursor = mysql.connection.cursor()
+@app.route('/register', methods=['POST'])
+def register():
+    data = request.json
+    name = data['email']
+    password = data['password']
+
+    salt = bcrypt.gensalt()
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
     
-#     #Executing SQL Statements
-#     cursor.execute("SELECT * FROM students")
-#     column_names=[x[0] for x in cursor.description] # Get columns name
-#     data = cursor.fetchall()
-#     cursor.close()
+     # Check if the user already exists
+    existing_user = User.query.filter_by(name=name).first()
+    if existing_user:
+        return jsonify({'status': 'fail', 'message': 'Account already exists!'})
     
-#     json_data = []
-#     for result in data:
-#         json_data.append(dict(zip(column_names,result)))
-#     return jsonify(json_data)
+    # Create new user
+    new_user = User(name=name, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
 
-# @app.route('/register', methods=['POST'])
-# def register():
-#     data = request.json
-#     name = data['email']
-#     password = data['password']
+    return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
 
-#     salt = bcrypt.gensalt()
-#     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
-
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
-#     account = cursor.fetchone()
-#     if account:
-#         cursor.close()
-#         return jsonify({'status': 'fail', 'message': 'Account already exists!'})
-#     else:
-#         cursor.execute('INSERT INTO User (name, password) VALUES (%s, %s)', (name, hashed_password.decode('utf-8')))
-#         mysql.connection.commit()
-#         cursor.close()
-#         return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
+    # cursor = mysql.connection.cursor()
+    # cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
+    # account = cursor.fetchone()
+    # if account:
+    #     cursor.close()
+    #     return jsonify({'status': 'fail', 'message': 'Account already exists!'})
+    # else:
+    #     cursor.execute('INSERT INTO User (name, password) VALUES (%s, %s)', (name, hashed_password.decode('utf-8')))
+    #     mysql.connection.commit()
+    #     cursor.close()
+    #     return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
 
 # @app.route('/login', methods=['POST'])
 # def login():
@@ -202,20 +191,6 @@ def home():
 #     else:
 #         return jsonify({'loggedIn': False})
     
-# @app.route('/menu', methods=['GET'])
-# def get_menu_items():
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('SELECT * FROM Menu')
-#     column_names = [x[0] for x in cursor.description]
-#     data = cursor.fetchall()
-#     cursor.close()
-
-#     json_data = []
-#     for result in data:
-#         json_data.append(dict(zip(column_names, result)))
-
-#     return jsonify(json_data)
-
 # @app.route('/cart', methods = ['POST'])
 # def add_to_cart():
 #     data = request.json
