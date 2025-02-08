@@ -136,27 +136,23 @@ def register():
 
     return jsonify({'status': 'success', 'message': 'You have successfully registered!'}), 201
 
-# @app.route('/login', methods=['POST'])
-# def login():
-#     data = request.json
-#     email = data['email']
-#     password = data['password']
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.json
+    email = data['email']
+    password = data['password']
 
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('SELECT * FROM User WHERE name = %s', (email,))
-#     account = cursor.fetchone()
-#     cursor.close()
+    user = User.query.filter_by(name=email).first()
 
-#     if account:
-#         stored_password = account[2]
-#         if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-#             auth_token = encode_auth_token(account[0], email)
-#             if auth_token:
-#                 return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token, 'user_ID': account[0]})
-#         else:
-#             return jsonify({'status': 'fail', 'message': 'Incorrect password!'})
-#     else:
-#         return jsonify({'status': 'fail', 'message': 'Account not found!'})
+    if user:
+        if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            auth_token = encode_auth_token(user.id, email)
+            if auth_token:
+                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token, 'user_ID': user.id})
+        else:
+            return jsonify({'status': 'fail', 'message': 'Incorrect password!'}), 401
+    else:
+        return jsonify({'status': 'fail', 'message': 'Account not found!'}), 404
 
 # #dont need?
 # @app.route('/logout', methods=['POST'])
@@ -164,20 +160,20 @@ def register():
 #     # Clients can simply discard the token on logout
 #     return jsonify({'status': 'success', 'message': 'Logout successful!'})
 
-# @app.route('/session', methods=['GET'])
-# def session_status():
-#     auth_token = request.headers.get('Authorization')
-#     print(f"Received Token: {auth_token}")
+@app.route('/session', methods=['GET'])
+def session_status():
+    auth_token = request.headers.get('Authorization')
+    print(f"Received Token: {auth_token}")
     
-#     if auth_token:
-#         payload = decode_auth_token(auth_token)
-#         print(f"Decoded Payload: {payload}")
-#         if isinstance(payload, str):
-#             return jsonify({'loggedIn': False, 'message': payload})
-#         else:
-#             return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
-#     else:
-#         return jsonify({'loggedIn': False})
+    if auth_token:
+        payload = decode_auth_token(auth_token)
+        print(f"Decoded Payload: {payload}")
+        if isinstance(payload, str):
+            return jsonify({'loggedIn': False, 'message': payload})
+        else:
+            return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
+    else:
+        return jsonify({'loggedIn': False})
     
 # @app.route('/cart', methods = ['POST'])
 # def add_to_cart():
