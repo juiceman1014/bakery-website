@@ -174,7 +174,30 @@ def session_status():
             return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
     else:
         return jsonify({'loggedIn': False})
-    
+
+@app.route('/cart', methods=['POST']) #add error codes
+def add_to_cart():
+    data = request.json
+    user_ID = data.get('user_ID')
+    item_ID = data.get('item_ID')
+    quantity = data.get('quantity', 1)
+
+    print("Received user_ID:", user_ID)
+    print("Received item_ID:", item_ID)  # Debugging line
+    print("Received quantity:", quantity)
+
+    existing_item = User_Cart.query.filter_by(user_ID = user_ID, item_ID = item_ID).first()
+
+    if existing_item:
+        existing_item.quantity += quantity
+    else:
+        new_cart_item = User_Cart(user_ID = user_ID, item_ID = item_ID, quantity=quantity)
+        db.session.add(new_cart_item)
+
+    db.session.commit()
+
+    return jsonify({'status':'success', 'message': 'Item added to cart!'})
+
 # @app.route('/cart', methods = ['POST'])
 # def add_to_cart():
 #     data = request.json
