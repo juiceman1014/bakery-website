@@ -1,6 +1,7 @@
 import bcrypt
 from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
 from flask_cors import CORS 
 import jwt
 import datetime
@@ -175,28 +176,60 @@ def session_status():
     else:
         return jsonify({'loggedIn': False})
 
-@app.route('/cart', methods=['POST']) #add error codes
+# @app.route('/cart', methods=['POST']) #add error codes
+# def add_to_cart():
+#     data = request.json
+#     user_ID = data.get('user_ID')
+#     item_ID = data.get('item_ID')
+#     quantity = data.get('quantity', 1)
+
+#     print("Received user_ID:", user_ID)
+#     print("Received item_ID:", item_ID)  # Debugging line
+#     print("Received quantity:", quantity)
+
+#     existing_item = User_Cart.query.filter_by(user_ID = user_ID, item_ID = item_ID).first()
+#     print(existing_item)
+#     if existing_item:
+#         existing_item.quantity += quantity
+#     else:
+#         new_cart_item = User_Cart(user_ID = user_ID, item_ID = item_ID, quantity=quantity)
+#         db.session.add(new_cart_item)
+
+#     db.session.commit()
+
+#     return jsonify({'status':'success', 'message': 'Item added to cart!'})
+
+@app.route('/cart', methods=['POST'])
 def add_to_cart():
     data = request.json
     user_ID = data.get('user_ID')
     item_ID = data.get('item_ID')
     quantity = data.get('quantity', 1)
 
-    print("Received user_ID:", user_ID)
-    print("Received item_ID:", item_ID)  # Debugging line
-    print("Received quantity:", quantity)
+    with db.engine.connect() as connection:
+        # Check if the item already exists in the cart
+        result = connection.execute(
+            text('SELECT * FROM User_Cart WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+            {'user_ID': user_ID, 'item_ID': item_ID}
+        ).fetchone()
 
-    existing_item = User_Cart.query.filter_by(user_ID = user_ID, item_ID = item_ID).first()
+        if result:
+            # Update quantity if item exists
+            connection.execute(
+                text('UPDATE User_Cart SET quantity = quantity + :quantity WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+                {'quantity': quantity, 'user_ID': user_ID, 'item_ID': item_ID}
+            )
+        else:
+            # Insert new item if it doesn't exist
+            connection.execute(
+                text('INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (:user_ID, :item_ID, :quantity)'),
+                {'user_ID': user_ID, 'item_ID': item_ID, 'quantity': quantity}
+            )
 
-    if existing_item:
-        existing_item.quantity += quantity
-    else:
-        new_cart_item = User_Cart(user_ID = user_ID, item_ID = item_ID, quantity=quantity)
-        db.session.add(new_cart_item)
+        connection.commit()
 
-    db.session.commit()
+    return jsonify({'status': 'success', 'message': 'Item added to cart!'})
 
-    return jsonify({'status':'success', 'message': 'Item added to cart!'})
 
 @app.route('/cart/<int:user_ID>', methods=['GET'])
 def get_cart_items(user_ID):
