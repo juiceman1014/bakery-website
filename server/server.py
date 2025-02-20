@@ -198,6 +198,29 @@ def add_to_cart():
 
     return jsonify({'status':'success', 'message': 'Item added to cart!'})
 
+@app.route('/cart/<int:user_ID>', methods=['GET'])
+def get_cart_items(user_ID):
+    # Join User_Cart and Menu using SQLAlchemy
+    cart_items = db.session.query(
+        User_Cart.item_ID.label('ID'),
+        Menu.item_name,
+        Menu.price,
+        User_Cart.quantity
+    ).join(Menu, User_Cart.item_ID == Menu.id).filter(User_Cart.user_ID == user_ID).all()
+
+    # Convert the result into a list of dictionaries
+    json_data = [
+        {
+            'ID': item.ID,
+            'item_name': item.item_name,
+            'price': item.price,
+            'quantity': item.quantity
+        }
+        for item in cart_items
+    ]
+
+    return jsonify(json_data)
+
 # @app.route('/cart/<int:user_ID>', methods=['GET'])
 # def get_cart_items(user_ID):
 #     cursor = mysql.connection.cursor()
