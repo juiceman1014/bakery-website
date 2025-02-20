@@ -30,12 +30,14 @@ const Menu = () => {
   }, []);
 
   const addToCart = async (item) => {
+    console.log("Adding item to cart:", item);
+    console.log("Item id:", item.id);
     
     if(user){
       try{
         const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart`, {
             user_ID: user.ID,
-            item_ID: item.ID,
+            item_ID: item.id,
             quantity: 1
           });
         alert(response.data.message);
