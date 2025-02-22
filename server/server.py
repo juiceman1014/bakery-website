@@ -155,12 +155,6 @@ def login():
     else:
         return jsonify({'status': 'fail', 'message': 'Account not found!'}), 404
 
-# #dont need?
-# @app.route('/logout', methods=['POST'])
-# def logout():
-#     # Clients can simply discard the token on logout
-#     return jsonify({'status': 'success', 'message': 'Logout successful!'})
-
 @app.route('/session', methods=['GET'])
 def session_status():
     auth_token = request.headers.get('Authorization')
@@ -175,29 +169,6 @@ def session_status():
             return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
     else:
         return jsonify({'loggedIn': False})
-
-# @app.route('/cart', methods=['POST']) #add error codes
-# def add_to_cart():
-#     data = request.json
-#     user_ID = data.get('user_ID')
-#     item_ID = data.get('item_ID')
-#     quantity = data.get('quantity', 1)
-
-#     print("Received user_ID:", user_ID)
-#     print("Received item_ID:", item_ID)  # Debugging line
-#     print("Received quantity:", quantity)
-
-#     existing_item = User_Cart.query.filter_by(user_ID = user_ID, item_ID = item_ID).first()
-#     print(existing_item)
-#     if existing_item:
-#         existing_item.quantity += quantity
-#     else:
-#         new_cart_item = User_Cart(user_ID = user_ID, item_ID = item_ID, quantity=quantity)
-#         db.session.add(new_cart_item)
-
-#     db.session.commit()
-
-#     return jsonify({'status':'success', 'message': 'Item added to cart!'})
 
 @app.route('/cart', methods=['POST'])
 def add_to_cart():
@@ -254,187 +225,175 @@ def get_cart_items(user_ID):
 
     return jsonify(json_data)
 
-# @app.route('/cart/<int:user_ID>', methods=['GET'])
-# def get_cart_items(user_ID):
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('''
-#         SELECT UC.item_ID AS ID, M.item_name, M.price, UC.quantity
-#         FROM User_Cart UC, Menu M
-#         WHERE UC.item_ID = M.ID AND UC.user_ID = %s
-#     ''', (user_ID, ))
-#     column_names = [x[0] for x in cursor.description]
-#     data = cursor.fetchall()
-#     cursor.close()
+@app.route('/past-order/<int:user_ID>', methods=['GET'])
+def get_past_order(user_ID):
+    with db.engine.connect() as connection:
+        result = connection.execute(
+            text('''
+                SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
+                FROM User_Past_Order PO, Menu M, Orders O
+                WHERE PO.item_ID = M.ID AND PO.user_ID = :user_ID AND PO.order_ID = O.ID
+            '''), 
+            {"user_ID": user_ID}
+        )
 
-#     json_data = []
-#     for result in data:
-#         json_data.append(dict(zip(column_names, result)))
+        # Get column names from the result object
+        column_names = result.keys()
+
+        # Fetch all data as a list of dictionaries
+        json_data = [dict(zip(column_names, row)) for row in result]
+
+    return jsonify(json_data)
+
+@app.route('/cart', methods=['DELETE'])
+def delete_cart_item():
+    user_ID = request.args.get('user_ID')
+    item_ID = request.args.get('item_ID')
+
+    print(f"Received user_ID: {user_ID}")
+    print(f"Received item_ID: {item_ID}")
+
+    with db.engine.connect() as connection:
+        connection.execute(
+            text('DELETE FROM User_Cart WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+            {"user_ID": user_ID, "item_ID": item_ID}
+        )
+        connection.commit()
+
+    return jsonify({'status': 'success', 'message': 'Item removed from cart!'})
+
+@app.route('/submit-order-pickup', methods=['POST'])
+def submit_order_pickup():
+    data = request.json
+    cart_items = data.get('cartItems')
+    pickup_details = data.get('pickupDetails')
+
+    if not cart_items or len(cart_items) == 0:
+        return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
+
+    pickup_name = pickup_details.get('name')
+    pickup_email = pickup_details.get('email')
+    pickup_phone = pickup_details.get('phone')
+
+    cart_details = "\n    ".join(
+        [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
+    )
+
+    total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
+
+    email_body = f"""
+    Order Confirmation:
+
+    Pickup Details:
+    Name: {pickup_name}
+    Email: {pickup_email}
+    Phone: {pickup_phone}
+
+    Items Ordered: 
+    {cart_details}
+
+    Total Price: ${total_price:.2f}
+    """
+
+    msg = Message(f"Pickup Order Confirmation - {pickup_name}", recipients = [cred.email_recipient])
+    msg.body = email_body
+    mail.send(msg)
+    print(repr(cart_details))
+
+    return jsonify({"status": "success", "message": "Order placed successfully!"})
+
+@app.route('/submit-order-delivery', methods=['POST'])
+def submit_order_delivery():
+    data = request.json
+    cart_items = data.get('cartItems')
+    delivery_details = data.get('deliveryDetails')
     
-#     return jsonify(json_data)
+    if not cart_items or len(cart_items) == 0:
+        return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
 
-# @app.route('/past-order/<int:user_ID>', methods=['GET'])
-# def get_past_order(user_ID):
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('''
-#         SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
-#         FROM User_Past_Order PO, Menu M, Orders O
-#         WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.order_ID = O.ID
-#     ''', (user_ID, ))
-#     column_names = [x[0] for x in cursor.description]
-#     data = cursor.fetchall()
-#     cursor.close()
+    delivery_name = delivery_details.get('name')
+    delivery_email = delivery_details.get('email')
+    delivery_phone = delivery_details.get('phone')
+    delivery_state = delivery_details.get('state')
+    delivery_city = delivery_details.get('city')
+    delivery_zip_code = delivery_details.get('zipCode')
+    delivery_address = delivery_details.get('address')
 
-#     json_data = []
-#     for result in data:
-#         json_data.append(dict(zip(column_names, result)))
-    
-#     return jsonify(json_data)
+    cart_details = "\n    ".join(
+        [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
+    )
 
-# @app.route('/cart', methods=['DELETE'])
-# def delete_cart_item():
-#     user_ID = request.args.get('user_ID')
-#     item_ID = request.args.get('item_ID')
+    total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
 
-#     print(f"Received user_ID: {user_ID}")
-#     print(f"Received item_ID: {item_ID}")
+    email_body = f"""
+    Order Confirmation:
 
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
-#     mysql.connection.commit()
-#     cursor.close()
+    Delivery Details:
+    Name: {delivery_name}
+    Email: {delivery_email}
+    Phone: {delivery_phone}
+    State: {delivery_state}
+    City: {delivery_city}
+    Zip Code: {delivery_zip_code}
+    Address: {delivery_address}
 
-#     return jsonify({'status': 'success', 'message':'Item removed from cart!'})
+    Items Ordered: 
+    {cart_details}
 
-# @app.route('/submit-order-pickup', methods=['POST'])
-# def submit_order_pickup():
-#     data = request.json
-#     cart_items = data.get('cartItems')
-#     pickup_details = data.get('pickupDetails')
+    Total Price: ${total_price:.2f}
+    """
 
-#     if not cart_items or len(cart_items) == 0:
-#         return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
+    msg = Message(f"Delivery Order Confirmation - {delivery_name}", recipients = [cred.email_recipient])
+    msg.body = email_body
+    mail.send(msg)
+    print(repr(cart_details))
 
-#     pickup_name = pickup_details.get('name')
-#     pickup_email = pickup_details.get('email')
-#     pickup_phone = pickup_details.get('phone')
+    return jsonify({"status": "success", "message": "Order placed successfully!"})
 
-#     cart_details = "\n    ".join(
-#         [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
-#     )
+@app.route('/fill-past-order', methods=['POST'])
+def fill_past_order():
+    data = request.json
+    cart_items = data.get('cartItems')
+    user_ID = data.get('user_ID')
+    order_date = data.get('order_date')
 
-#     total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
+    try:
+        with db.engine.connect() as connection:
+            # Insert into Orders table
+            result = connection.execute(
+                text('INSERT INTO Orders (user_ID, order_date) VALUES (:user_ID, :order_date)'),
+                {"user_ID": user_ID, "order_date": order_date}
+            )
+            # Get the last inserted order_ID
+            order_ID = result.lastrowid
 
-#     email_body = f"""
-#     Order Confirmation:
+            # Insert into User_Past_Order table for each item
+            for item in cart_items:
+                connection.execute(
+                    text('''
+                        INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID) 
+                        VALUES (:user_ID, :item_ID, :quantity, :order_ID)
+                    '''),
+                    {"user_ID": user_ID, "item_ID": item['ID'], "quantity": item['quantity'], "order_ID": order_ID}
+                )
 
-#     Pickup Details:
-#     Name: {pickup_name}
-#     Email: {pickup_email}
-#     Phone: {pickup_phone}
+            connection.commit()
 
-#     Items Ordered: 
-#     {cart_details}
+        return jsonify({"status": "success", "message": "Order placed successfully!"})
 
-#     Total Price: ${total_price:.2f}
-#     """
+    except Exception as e:
+        print("Error processing order: ", str(e))
+        return jsonify({"status": "error", "message": "There was an issue placing your order."})
 
-#     msg = Message(f"Pickup Order Confirmation - {pickup_name}", recipients = [cred.email_recipient])
-#     msg.body = email_body
-#     mail.send(msg)
-#     print(repr(cart_details))
-
-#     return jsonify({"status": "success", "message": "Order placed successfully!"})
-
-# @app.route('/submit-order-delivery', methods=['POST'])
-# def submit_order_delivery():
-#     data = request.json
-#     cart_items = data.get('cartItems')
-#     delivery_details = data.get('deliveryDetails')
-    
-#     if not cart_items or len(cart_items) == 0:
-#         return jsonify({"status":"error","message":"Order invalid, your cart is empty!"})
-
-#     delivery_name = delivery_details.get('name')
-#     delivery_email = delivery_details.get('email')
-#     delivery_phone = delivery_details.get('phone')
-#     delivery_state = delivery_details.get('state')
-#     delivery_city = delivery_details.get('city')
-#     delivery_zip_code = delivery_details.get('zipCode')
-#     delivery_address = delivery_details.get('address')
-
-#     cart_details = "\n    ".join(
-#         [f"{item['quantity']} x {item['item_name']} at ${float(item['price']):.2f} each" for item in cart_items]
-#     )
-
-#     total_price = sum(item['quantity'] * float(item['price']) for item in cart_items)
-
-#     email_body = f"""
-#     Order Confirmation:
-
-#     Delivery Details:
-#     Name: {delivery_name}
-#     Email: {delivery_email}
-#     Phone: {delivery_phone}
-#     State: {delivery_state}
-#     City: {delivery_city}
-#     Zip Code: {delivery_zip_code}
-#     Address: {delivery_address}
-
-#     Items Ordered: 
-#     {cart_details}
-
-#     Total Price: ${total_price:.2f}
-#     """
-
-#     msg = Message(f"Delivery Order Confirmation - {delivery_name}", recipients = [cred.email_recipient])
-#     msg.body = email_body
-#     mail.send(msg)
-#     print(repr(cart_details))
-
-#     return jsonify({"status": "success", "message": "Order placed successfully!"})
-
-# @app.route('/fill-past-order', methods = ['POST'])
-# def fill_past_order():
-
-#     data = request.json
-#     cart_items = data.get('cartItems')
-#     user_ID = data.get('user_ID')
-#     order_date = data.get('order_date')
-
-#     try:
-#         cursor = mysql.connection.cursor()
-
-#         cursor.execute('''
-#             INSERT INTO Orders (user_ID, order_date)   
-#             VALUES(%s, %s)            
-#         ''', (user_ID, order_date))
-#         order_ID = cursor.lastrowid
-
-#         for item in cart_items:
-#             cursor.execute('''
-#                 INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID)
-#                 VALUES (%s, %s, %s, %s)    
-#             ''', (user_ID, item['ID'], item['quantity'], order_ID))
-
-#         mysql.connection.commit()
-
-#         cursor.close()
-#         return jsonify({"status": "success", "message": "Order placed successfully!"})
-
-#     except Exception as e:
-#         mysql.connection.rollback()
-#         print("Error processing order: ", str(e))
-#         return jsonify({"status": "error", "message":"There was an issue placing your order."})
-
-
-# @app.route('/cart-clear/<int:user_ID>', methods=['DELETE'])
-# def delete_cart(user_ID):
-#     cursor = mysql.connection.cursor()
-#     cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s', (user_ID,))
-#     mysql.connection.commit()
-#     cursor.close()
-
-#     return jsonify({'status':'success', 'message':'All items removed from cart!'})
+@app.route('/cart-clear/<int:user_ID>', methods=['DELETE'])
+def delete_cart(user_ID):
+    with db.engine.connect() as connection:
+        connection.execute(
+            text('DELETE FROM User_Cart WHERE user_ID = :user_ID'),
+            {"user_ID": user_ID}
+        )
+        connection.commit()
+    return jsonify({'status': 'success', 'message': 'All items removed from cart!'})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)
