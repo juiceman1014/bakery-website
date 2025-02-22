@@ -1,8 +1,8 @@
 import bcrypt
 from flask import Flask, request, jsonify
-from flask_mysqldb import MySQL
+from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.sql import text
 from flask_cors import CORS 
-import MySQLdb.cursors
 import jwt
 import datetime
 import cred #credential file DO NOT push
@@ -11,15 +11,13 @@ from flask_mail import Mail, Message
 #app instance
 app = Flask(__name__)
 app.secret_key = cred.secretkey
-CORS(app) #Cors policy so FE can fetch API 
 
-#DB connector
-app.config['MYSQL_HOST'] = cred.host
-app.config['MYSQL_PORT'] = cred.port
-app.config['MYSQL_USER'] = cred.user
-app.config['MYSQL_PASSWORD'] = cred.password
-app.config['MYSQL_DB'] = cred.db
-mysql = MySQL(app)
+# Replace with your actual database credentials
+app.config['SQLALCHEMY_DATABASE_URI'] = cred.DB_URL
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize SQLAlchemy
+db = SQLAlchemy(app)
 
 app.config['MAIL_SERVER'] = cred.mail_server
 app.config['MAIL_PORT'] = cred.mail_port
@@ -29,6 +27,45 @@ app.config['MAIL_PASSWORD'] = cred.mail_password
 app.config['MAIL_DEFAULT_SENDER'] = cred.mail_username
 mail = Mail(app)
 
+CORS(app) #Cors policy so FE can fetch API 
+
+# Start define a Model for SQLALchemy
+class Menu(db.Model):
+    __tablename__ = 'Menu'  # Match the existing table name
+    id = db.Column(db.Integer, primary_key=True)
+    item_name = db.Column(db.String(100), nullable=False)
+    photo = db.Column(db.String(100), nullable=False)
+    price = db.Column(db.String(100), nullable=False)
+    category = db.Column(db.String(100), nullable=False)
+    description = db.Column(db.String(100), nullable=False)
+
+class User(db.Model):
+    __tablename__ = 'User'  # Match the existing table name
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
+
+class Orders(db.Model):
+    __tablename__ = 'Orders'  # Match the existing table name
+    id = db.Column(db.Integer, primary_key=True)
+    user_ID = db.Column(db.String(100), nullable=False)
+    order_date = db.Column(db.String(100), nullable=False)
+    
+class User_Past_Order(db.Model):
+    __tablename__ = 'User_Past_Order'  # Match the existing table name
+    user_ID = db.Column(db.Integer, primary_key=True)
+    item_ID = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(100), nullable=False)
+    order_ID = db.Column(db.String(100), nullable=False)
+    
+class User_Cart(db.Model):
+    __tablename__ = 'User_Cart'  # Match the existing table name
+    user_ID = db.Column(db.Integer, primary_key=True)
+    item_ID = db.Column(db.String(100), nullable=False)
+    quantity = db.Column(db.String(100), nullable=False)
+# End define a Model for SQLALchemy
+
+#Start Login mechanism
 def encode_auth_token(user_id, user_email):
     try:
         payload = {
@@ -49,6 +86,7 @@ def decode_auth_token(auth_token):
         return 'Signature expired. Please log in again.'
     except jwt.InvalidTokenError:
         return 'Invalid token. Please log in again.'
+#End Login mechanism
 
 #Route
 @app.route("/hello", methods=['GET'])
@@ -61,43 +99,43 @@ def home():
         'name':"Danh",
         'age' :"25"
     }])
-       
-@app.route("/test", methods=['GET'])
-def testSQL():
-    #Creating a connection cursor
-    cursor = mysql.connection.cursor()
-    
-    #Executing SQL Statements
-    cursor.execute("SELECT * FROM students")
-    column_names=[x[0] for x in cursor.description] # Get columns name
-    data = cursor.fetchall()
-    cursor.close()
-    
-    json_data = []
-    for result in data:
-        json_data.append(dict(zip(column_names,result)))
-    return jsonify(json_data)
 
+@app.route('/menu', methods=['GET'])
+def get_menu():
+    menus = Menu.query.all()
+    menu_list = [
+        {
+            "id": menu.id,
+            "item_name": menu.item_name,
+            "photo": menu.photo,
+            "price": float(menu.price),  # Convert Decimal to float
+            "category": menu.category,
+            "description": menu.description
+        }
+        for menu in menus
+    ]
+    return jsonify(menu_list)
+       
 @app.route('/register', methods=['POST'])
 def register():
     data = request.json
-    name = data['email']
+    email = data['email']
     password = data['password']
 
     salt = bcrypt.gensalt()
     hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
+    
+     # Check if the user already exists
+    existing_user = User.query.filter_by(name=email).first()
+    if existing_user:
+        return jsonify({'status': 'fail', 'message': 'Account already exists!'}), 400
+    
+    # Create new user
+    new_user = User(name=email, password=hashed_password)
+    db.session.add(new_user)
+    db.session.commit()
 
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM User WHERE name = %s', (name,))
-    account = cursor.fetchone()
-    if account:
-        cursor.close()
-        return jsonify({'status': 'fail', 'message': 'Account already exists!'})
-    else:
-        cursor.execute('INSERT INTO User (name, password) VALUES (%s, %s)', (name, hashed_password.decode('utf-8')))
-        mysql.connection.commit()
-        cursor.close()
-        return jsonify({'status': 'success', 'message': 'You have successfully registered!'})
+    return jsonify({'status': 'success', 'message': 'You have successfully registered!'}), 201
 
 @app.route('/login', methods=['POST'])
 def login():
@@ -105,27 +143,17 @@ def login():
     email = data['email']
     password = data['password']
 
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM User WHERE name = %s', (email,))
-    account = cursor.fetchone()
-    cursor.close()
+    user = User.query.filter_by(name=email).first()
 
-    if account:
-        stored_password = account[2]
-        if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
-            auth_token = encode_auth_token(account[0], email)
+    if user:
+        if bcrypt.checkpw(password.encode('utf-8'), user.password.encode('utf-8')):
+            auth_token = encode_auth_token(user.id, email)
             if auth_token:
-                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token, 'user_ID': account[0]})
+                return jsonify({'status': 'success', 'message': 'Login successful!', 'auth_token': auth_token, 'user_ID': user.id})
         else:
-            return jsonify({'status': 'fail', 'message': 'Incorrect password!'})
+            return jsonify({'status': 'fail', 'message': 'Incorrect password!'}), 401
     else:
-        return jsonify({'status': 'fail', 'message': 'Account not found!'})
-
-#dont need?
-@app.route('/logout', methods=['POST'])
-def logout():
-    # Clients can simply discard the token on logout
-    return jsonify({'status': 'success', 'message': 'Logout successful!'})
+        return jsonify({'status': 'fail', 'message': 'Account not found!'}), 404
 
 @app.route('/session', methods=['GET'])
 def session_status():
@@ -141,81 +169,80 @@ def session_status():
             return jsonify({'loggedIn': True, 'user_email': payload['email'], 'user_ID': payload['ID']})
     else:
         return jsonify({'loggedIn': False})
-    
-@app.route('/menu', methods=['GET'])
-def get_menu_items():
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM Menu')
-    column_names = [x[0] for x in cursor.description]
-    data = cursor.fetchall()
-    cursor.close()
 
-    json_data = []
-    for result in data:
-        json_data.append(dict(zip(column_names, result)))
-
-    return jsonify(json_data)
-
-@app.route('/cart', methods = ['POST'])
+@app.route('/cart', methods=['POST'])
 def add_to_cart():
     data = request.json
     user_ID = data.get('user_ID')
     item_ID = data.get('item_ID')
     quantity = data.get('quantity', 1)
 
-    cursor = mysql.connection.cursor()
-    cursor.execute('SELECT * FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
-    existing_item = cursor.fetchone()
+    with db.engine.connect() as connection:
+        # Check if the item already exists in the cart
+        result = connection.execute(
+            text('SELECT * FROM User_Cart WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+            {'user_ID': user_ID, 'item_ID': item_ID}
+        ).fetchone()
 
-    if existing_item:
-        cursor.execute(
-            'UPDATE User_Cart SET quantity = quantity + %s WHERE user_ID = %s and item_ID = %s',
-            (quantity, user_ID, item_ID)
-        )
-    else:
-        cursor.execute(
-            'INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (%s, %s, %s)',
-            (user_ID, item_ID, quantity)
-        )
-    mysql.connection.commit()
-    cursor.close()
+        if result:
+            # Update quantity if item exists
+            connection.execute(
+                text('UPDATE User_Cart SET quantity = quantity + :quantity WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+                {'quantity': quantity, 'user_ID': user_ID, 'item_ID': item_ID}
+            )
+        else:
+            # Insert new item if it doesn't exist
+            connection.execute(
+                text('INSERT INTO User_Cart (user_ID, item_ID, quantity) VALUES (:user_ID, :item_ID, :quantity)'),
+                {'user_ID': user_ID, 'item_ID': item_ID, 'quantity': quantity}
+            )
 
-    return jsonify({'status': 'success', 'message' : 'Item added to cart!'})
+        connection.commit()
+
+    return jsonify({'status': 'success', 'message': 'Item added to cart!'})
+
 
 @app.route('/cart/<int:user_ID>', methods=['GET'])
 def get_cart_items(user_ID):
-    cursor = mysql.connection.cursor()
-    cursor.execute('''
-        SELECT UC.item_ID AS ID, M.item_name, M.price, UC.quantity
-        FROM User_Cart UC, Menu M
-        WHERE UC.item_ID = M.ID AND UC.user_ID = %s
-    ''', (user_ID, ))
-    column_names = [x[0] for x in cursor.description]
-    data = cursor.fetchall()
-    cursor.close()
+    # Join User_Cart and Menu using SQLAlchemy
+    cart_items = db.session.query(
+        User_Cart.item_ID.label('ID'),
+        Menu.item_name,
+        Menu.price,
+        User_Cart.quantity
+    ).join(Menu, User_Cart.item_ID == Menu.id).filter(User_Cart.user_ID == user_ID).all()
 
-    json_data = []
-    for result in data:
-        json_data.append(dict(zip(column_names, result)))
-    
+    # Convert the result into a list of dictionaries
+    json_data = [
+        {
+            'ID': item.ID,
+            'item_name': item.item_name,
+            'price': item.price,
+            'quantity': item.quantity
+        }
+        for item in cart_items
+    ]
+
     return jsonify(json_data)
 
 @app.route('/past-order/<int:user_ID>', methods=['GET'])
 def get_past_order(user_ID):
-    cursor = mysql.connection.cursor()
-    cursor.execute('''
-        SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
-        FROM User_Past_Order PO, Menu M, Orders O
-        WHERE PO.item_ID = M.ID AND PO.user_ID = %s AND PO.order_ID = O.ID
-    ''', (user_ID, ))
-    column_names = [x[0] for x in cursor.description]
-    data = cursor.fetchall()
-    cursor.close()
+    with db.engine.connect() as connection:
+        result = connection.execute(
+            text('''
+                SELECT PO.item_ID AS ID, M.item_name, M.price, PO.quantity, O.order_date, PO.order_ID
+                FROM User_Past_Order PO, Menu M, Orders O
+                WHERE PO.item_ID = M.ID AND PO.user_ID = :user_ID AND PO.order_ID = O.ID
+            '''), 
+            {"user_ID": user_ID}
+        )
 
-    json_data = []
-    for result in data:
-        json_data.append(dict(zip(column_names, result)))
-    
+        # Get column names from the result object
+        column_names = result.keys()
+
+        # Fetch all data as a list of dictionaries
+        json_data = [dict(zip(column_names, row)) for row in result]
+
     return jsonify(json_data)
 
 @app.route('/cart', methods=['DELETE'])
@@ -226,12 +253,14 @@ def delete_cart_item():
     print(f"Received user_ID: {user_ID}")
     print(f"Received item_ID: {item_ID}")
 
-    cursor = mysql.connection.cursor()
-    cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s AND item_ID = %s', (user_ID, item_ID))
-    mysql.connection.commit()
-    cursor.close()
+    with db.engine.connect() as connection:
+        connection.execute(
+            text('DELETE FROM User_Cart WHERE user_ID = :user_ID AND item_ID = :item_ID'),
+            {"user_ID": user_ID, "item_ID": item_ID}
+        )
+        connection.commit()
 
-    return jsonify({'status': 'success', 'message':'Item removed from cart!'})
+    return jsonify({'status': 'success', 'message': 'Item removed from cart!'})
 
 @app.route('/submit-order-pickup', methods=['POST'])
 def submit_order_pickup():
@@ -321,48 +350,50 @@ def submit_order_delivery():
 
     return jsonify({"status": "success", "message": "Order placed successfully!"})
 
-@app.route('/fill-past-order', methods = ['POST'])
+@app.route('/fill-past-order', methods=['POST'])
 def fill_past_order():
-
     data = request.json
     cart_items = data.get('cartItems')
     user_ID = data.get('user_ID')
     order_date = data.get('order_date')
 
     try:
-        cursor = mysql.connection.cursor()
+        with db.engine.connect() as connection:
+            # Insert into Orders table
+            result = connection.execute(
+                text('INSERT INTO Orders (user_ID, order_date) VALUES (:user_ID, :order_date)'),
+                {"user_ID": user_ID, "order_date": order_date}
+            )
+            # Get the last inserted order_ID
+            order_ID = result.lastrowid
 
-        cursor.execute('''
-            INSERT INTO Orders (user_ID, order_date)   
-            VALUES(%s, %s)            
-        ''', (user_ID, order_date))
-        order_ID = cursor.lastrowid
+            # Insert into User_Past_Order table for each item
+            for item in cart_items:
+                connection.execute(
+                    text('''
+                        INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID) 
+                        VALUES (:user_ID, :item_ID, :quantity, :order_ID)
+                    '''),
+                    {"user_ID": user_ID, "item_ID": item['ID'], "quantity": item['quantity'], "order_ID": order_ID}
+                )
 
-        for item in cart_items:
-            cursor.execute('''
-                INSERT INTO User_Past_Order (user_ID, item_ID, quantity, order_ID)
-                VALUES (%s, %s, %s, %s)    
-            ''', (user_ID, item['ID'], item['quantity'], order_ID))
+            connection.commit()
 
-        mysql.connection.commit()
-
-        cursor.close()
         return jsonify({"status": "success", "message": "Order placed successfully!"})
 
     except Exception as e:
-        mysql.connection.rollback()
         print("Error processing order: ", str(e))
-        return jsonify({"status": "error", "message":"There was an issue placing your order."})
-
+        return jsonify({"status": "error", "message": "There was an issue placing your order."})
 
 @app.route('/cart-clear/<int:user_ID>', methods=['DELETE'])
 def delete_cart(user_ID):
-    cursor = mysql.connection.cursor()
-    cursor.execute('DELETE FROM User_Cart WHERE user_ID = %s', (user_ID,))
-    mysql.connection.commit()
-    cursor.close()
-
-    return jsonify({'status':'success', 'message':'All items removed from cart!'})
+    with db.engine.connect() as connection:
+        connection.execute(
+            text('DELETE FROM User_Cart WHERE user_ID = :user_ID'),
+            {"user_ID": user_ID}
+        )
+        connection.commit()
+    return jsonify({'status': 'success', 'message': 'All items removed from cart!'})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=8000, debug=True)

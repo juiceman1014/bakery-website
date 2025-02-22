@@ -21,10 +21,17 @@ const Register = () => {
       setMessage(response.data.message);
       setMessageType(response.data.status);
     } catch (error) {
-      console.error("There was an error registering!", error);
-      setMessage("There was an error registering!");
-      setMessageType("error"); // Set message type to error
-    }
+      // Ensure response data is extracted from the error response
+      if (error.response) {
+          console.error("Registration error:", error.response.data);
+          setMessage(error.response.data.message); // Get message from backend response
+          setMessageType("error.response.data.status");
+      } else {
+          console.error("There was an error registering!", error);
+          setMessage("There was an error registering!");
+          setMessageType("error");
+      }
+  }
   };
 
   return (
