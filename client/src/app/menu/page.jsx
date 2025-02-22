@@ -46,13 +46,13 @@ const Menu = () => {
       }
     } else{
       let guestCart = JSON.parse(localStorage.getItem('guest_cart')) || [];
-      const existingItem = guestCart.find(cartItem => cartItem.ID === item.ID);
+      const existingItem = guestCart.find(cartItem => cartItem.ID === item.id);
 
       if(existingItem){
         existingItem.quantity += 1;
       }else{
         guestCart.push({
-          ID: item.ID,
+          ID: item.id,
           item_name: item.item_name,
           price: item.price,
           quantity: 1

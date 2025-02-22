@@ -55,48 +55,51 @@ const Cart = () => {
 
   return (
     <>
-      <div className="flex flex-row justify-center items-center h-screen">
-        <container className="flex flex-col justify-center items-center bg-orange-100 h-[500px] w-[500px] my-auto justify-evenly">
+      <div className="flex flex-row justify-center items-center h-screen bg-gray-100">
+        <div className="flex flex-col justify-center items-center bg-orange-100 h-[500px] w-[500px] rounded-lg shadow-lg p-6">
           
-          <div className="h-1/6 w-6/12 flex flex-col justify-center">
-          {cartItems.map((item) => (
-            <div key = {item.ID} className="flex justify-between">
-              <p>{item.item_name}</p>
-              <p>{item.price}</p>
-              <p>Quantity: {item.quantity}</p>
-              <button
-              onClick = {() => handleDelete(item.ID)}
-              className = "text-[red]"
-              >
-                X
+          {/* Cart Items */}
+          <div className="h-1/2 w-10/12 flex flex-col space-y-3 overflow-y-auto">
+            {cartItems.map((item) => (
+              <div key={item.ID} className="flex justify-between items-center bg-white p-3 rounded-lg shadow-sm">
+                <div>
+                  <p className="font-semibold">{item.item_name}</p>
+                  <p className="text-gray-600">${item.price}</p>
+                  <p className="text-gray-500">Quantity: {item.quantity}</p>
+                </div>
+                <button
+                  onClick={() => handleDelete(item.ID)}
+                  className="text-red-500 font-bold text-lg hover:text-red-700 transition duration-200"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+  
+          {/* Total Price */}
+          <div className="w-10/12 flex justify-between items-center text-lg font-semibold mt-4 border-t pt-2">
+            <p>Total:</p>
+            <p>${(Number(total) || 0).toFixed(2)}</p>
+          </div>
+  
+          {/* Buttons */}
+          <div className="flex justify-between w-10/12 mt-4 space-x-4">
+            <Link href="/menu" className="w-1/2">
+              <button className="w-full bg-white py-2 px-4 rounded-lg shadow-md hover:bg-gray-200 transition duration-200">
+                Order More
               </button>
-            </div>
-          ))}
-        
-            <div className="flex justify-between">
-              <p>Total</p>
-              <p>${total}</p>
-            </div>
-          </div>
-
-          <div className="flex justify-between w-6/12">
-            <Link
-              href="/menu"
-              className="bg-white flex justify-center"
-            >
-              <button>Order More</button>
             </Link>
-            <Link
-              href="/checkout-methods"
-              className="bg-white flex justify-center"
-            >
-              <button>Checkout</button>
+            <Link href="/checkout-methods" className="w-1/2">
+              <button className="w-full bg-orange-500 text-white py-2 px-4 rounded-lg shadow-md hover:bg-orange-600 transition duration-200">
+                Checkout
+              </button>
             </Link>
           </div>
-        </container>
+        </div>
       </div>
     </>
-  );
+  );  
 };
 
 export default Cart;
