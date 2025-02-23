@@ -8,9 +8,7 @@ This is Bakery Backend that using Flask
 python3 -m venv env
 ```
 
-**2. Create a MySQL database and use** `Bakery_DB.dump`**file**
-
-**3. Activate the virtual environment**<br>
+**2. Activate the virtual environment**<br>
 On macOS/Linux:
 
 ```bash
@@ -23,11 +21,13 @@ On window:
 env\Scripts\activate
 ```
 
-**4. Install dependencies package with**`requirements.txt`
+**3. Install dependencies package with**`requirements.txt`
 
 ```bash
 pip3 install -r requirements.txt
 ```
+
+**4. Create a MySQL database and use** `Bakery_DB.dump`**file**
 
 **5. Run application**
 
