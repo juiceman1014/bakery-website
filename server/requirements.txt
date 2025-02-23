@@ -6,3 +6,4 @@ flask_sqlalchemy
 PyJWT
 jwt
 bcrypt
+pymysql
