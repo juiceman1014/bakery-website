@@ -10,10 +10,6 @@ python3 -m venv env
 
 **2. Create a MySQL database and use** `Bakery_DB.dump`**file**
 
-```bash
-python3 -m venv env
-```
-
 **3. Activate the virtual environment**<br>
 On macOS/Linux:
 
