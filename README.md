@@ -1,4 +1,4 @@
-# bakery-website
+# Bakery-website
 Bakery website to sell mooncakes.
 
-Visit website at: https://uyenbakery.vercel.app/
+Visit the website at: https://uyenbakery.vercel.app/
