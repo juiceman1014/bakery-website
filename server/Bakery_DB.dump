@@ -100,7 +100,7 @@ CREATE TABLE `User` (
 
 LOCK TABLES `User` WRITE;
 /*!40000 ALTER TABLE `User` DISABLE KEYS */;
-INSERT INTO `User` VALUES (1,'logintest@gmail.com','$2b$12$bLXKkcENrsdNq6y7Df8ZUO8Tne2X4.lL4Z2UiEmOY7BwESnnhNuO6'),(2,'danh.pham@sjsu.edu','$2b$12$vvjN95wcG6eWEFNcM/zzFeCdHfCSQ52n3EOAb94v38wYFAjn4zgAW'),(3,'test@gmail.com','$2b$12$IH1ZfxOKeawEjFtgVImSoOuro4jPpVfSCBBgr7C2FhXQRWr6PPRNO'),(4,'awstest@test.com','$2b$12$C2WItPfnUECSpLyVM7dir.KQQDVVCQRtAL6Ra8LeOv5./t0zwGycK'),(5,'sslhttps@test.com','$2b$12$6swrl7CB1hfB.Z3k.to18uAf2l02gOtX4Oe3Z9TvWNbUmr6G6CF6u'),(6,'iloveanime@test.com','$2b$12$BzG56KTm2e4Cdxh0ZsAZ6eEQJXfLJN6Aw11HfcUWK9nYHY/1lzVRy'),(7,'newhttps@test.com','$2b$12$thS.jqCPcxsOSF6Wh3RT9u9XGHd0qdFIECQoAUwfaBAUxZTVyHcyO'),(8,'testpostman@test.com','$2b$12$ABYnXqmwRU5hUJRsC0PN5uB/P9ScZXkiJVWndCQqxuO1srKgbxaWC'),(9,'testpostman1@test.com','$2b$12$Th3ILGvcrHuWvp0bi0iRNOnVXJ0Af/dD8ROC/wzNWBVWwzp6J3WZi'),(10,'logintest2@gmail.com','$2b$12$HCZniB862w7dbyIElZQ6E..34Kodzj3/jY95olV8NNhBz9MNlX8pG'),(11,'logintest3@gmail.com','$2b$12$LKZvqFC8pYVumALh41p1rO13sZiRbMyOzX7kb49ZzDVfe8/LYzjhu'),(12,'testpostman32@test.com','$2b$12$y83oP9vKpD.pm1qE.w/VgOOBUsDMVhAZnLnvL5UZalI4Ok8KQlDFq'),(13,'logintest4@gmail.com','$2b$12$WdHEhARNehpkjOT50zE7Ue5PWAaUG4yNBpjGUrKn9DI97PUokz/cS'),(14,'newtest@gmail.com','$2b$12$IkEkis28SHoXcor4neL6Q.yJ8E4If7yC1lIY1ENjolLShjhWF31AK'),(15,'logintest5@gmail.com','$2b$12$255JcxBGg0YDUhho.GE.8OqY58nM3a6X3qLfbIV7KeGdma3cUYokW'),(16,'testpostman39@test.com','$2b$12$fB/RGs6KoI7kjq07.UXZTuvFbvRid8mEhCEXRAWP1zvBK6p5.Dzu6');
+INSERT INTO `User` VALUES (1,'logintest@gmail.com','$2b$12$bLXKkcENrsdNq6y7Df8ZUO8Tne2X4.lL4Z2UiEmOY7BwESnnhNuO6');
 /*!40000 ALTER TABLE `User` ENABLE KEYS */;
 UNLOCK TABLES;
 
