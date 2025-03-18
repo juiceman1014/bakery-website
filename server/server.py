@@ -3,6 +3,7 @@ from flask import Flask, request, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.sql import text
 from flask_cors import CORS 
+import jwt #belongs to PyJWT
 import datetime
 import cred #credential file DO NOT push
 from flask_mail import Mail, Message
