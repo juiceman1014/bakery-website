@@ -5,17 +5,21 @@ import axios from "axios";
 import Link from "next/link";
 import { UserContext } from "../../context/UserContext.jsx";
 
-const Pickup = () => {
+const Delivery = () => {
   const { user } = useContext(UserContext);
-  const [deliveryDetails, setdeliveryDetails] = useState ({
+  const [deliveryDetails, setDeliveryDetails] = useState({
     name: "",
     email: "",
     phone: "",
+    state: "",
+    city: "",
+    zipCode: "",
+    address: "",
   });
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setdeliveryDetails((prevDetails) => ({
+    setDeliveryDetails((prevDetails) => ({
       ...prevDetails,
       [name]: value,
     }));
@@ -23,163 +27,113 @@ const Pickup = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
 
     let cartItems = [];
 
-    if(user){
-      try{
-        const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart/${user.ID}`);
+    if (user) {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/cart/${user.ID}`
+        );
         cartItems = response.data;
-      }catch(error){
+      } catch (error) {
         console.error("Error fetching user cart:", error);
         return;
       }
-    } else{
+    } else {
       cartItems = JSON.parse(localStorage.getItem("guest_cart")) || [];
     }
 
-    try{
+    try {
       const [submitOrderResponse, fillPastOrderResponse] = await Promise.all([
-
-        axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/submit-order-delivery`, {
-        user_ID: user ? user.ID : null,
-        cartItems: cartItems,
-        deliveryDetails: deliveryDetails,
-        }),
-
+        axios.post(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/submit-order-delivery`,
+          {
+            user_ID: user ? user.ID : null,
+            cartItems: cartItems,
+            deliveryDetails: deliveryDetails,
+          }
+        ),
         axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/fill-past-order`, {
           user_ID: user ? user.ID : null,
           cartItems: cartItems,
-          order_date: today
-        })
-
+          order_date: today,
+        }),
       ]);
 
-      if (submitOrderResponse.data.status === "success"){
+      if (submitOrderResponse.data.status === "success") {
         alert("Order placed successfully!");
-          if(user){
-            await axios.delete(`${process.env.NEXT_PUBLIC_BACKEND_URL}/cart-clear/${user.ID}`);
-             window.location.href = "/cart"
-          } else{
-            localStorage.removeItem("guest_cart");
-            window.location.href = "/cart";
-          }
+        if (user) {
+          await axios.delete(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/cart-clear/${user.ID}`
+          );
+          window.location.href = "/cart";
+        } else {
+          localStorage.removeItem("guest_cart");
+          window.location.href = "/cart";
+        }
       }
-    } catch(error){
+    } catch (error) {
       console.error("Error placing order:", error);
       alert("There was an issue placing your order. Please try again.");
     }
   };
 
   return (
-    <>
-      <div className="flex flex-col justify-center items-center h-screen mt-20">
-        <form 
-        onSubmit = {handleSubmit}
-        className="flex flex-col justify-center items-start bg-orange-100 h-[500px] w-[500px] justify-evenly"
+    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-orange-100 p-8 rounded-lg shadow-lg w-full max-w-md"
+      >
+        <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
+          Delivery Details
+        </h2>
+
+        {[
+          { label: "Delivery Name", name: "name", type: "text" },
+          { label: "Email Address", name: "email", type: "email" },
+          { label: "Phone Number", name: "phone", type: "tel" },
+          { label: "State", name: "state", type: "text" },
+          { label: "City", name: "city", type: "text" },
+          { label: "Zip Code", name: "zipCode", type: "text" },
+          { label: "Address", name: "address", type: "text" },
+        ].map((field) => (
+          <div className="mb-4" key={field.name}>
+            <label className="block text-gray-700 font-semibold mb-1">
+              {field.label}:
+            </label>
+            <input
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-400"
+              name={field.name}
+              type={field.type}
+              value={deliveryDetails[field.name]}
+              onChange={handleInputChange}
+              required
+            />
+          </div>
+        ))}
+
+        <button
+          type="submit"
+          className="w-full bg-blue-500 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 transition duration-300"
         >
-          <div className="flex flex-col ml-[3rem]">
-            <p>Delivery Name: </p>
-            <input 
-            className="w-[300px]"
-            name="name"
-            value={deliveryDetails.name}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
+          Submit Order
+        </button>
+      </form>
 
-          <div className="flex flex-col ml-[3rem]">
-            <p>Email Address: </p>
-            <input 
-            className="w-[300px]"
-            name="email"
-            type="email"
-            value={deliveryDetails.email}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-          <div className="flex flex-col ml-[3rem]">
-            <p>Phone Number: </p>
-            <input 
-            className="w-[300px]"
-            name="phone"
-            type="tel"
-            value={deliveryDetails.phone}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-          <div className="flex flex-col ml-[3rem]">
-            <p>State: </p>
-            <input 
-            className="w-[300px]"
-            name="state"
-            value={deliveryDetails.state}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-          <div className="flex flex-col ml-[3rem]">
-            <p>City: </p>
-            <input 
-            className="w-[300px]"
-            name="city"
-            value={deliveryDetails.city}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-          <div className="flex flex-col ml-[3rem]">
-            <p>Zip Code: </p>
-            <input 
-            className="w-[300px]"
-            name="zipCode"
-            value={deliveryDetails.zipCode}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-          <div className="flex flex-col ml-[3rem]">
-            <p>Address: </p>
-            <input 
-            className="w-[300px]"
-            name="address"
-            value={deliveryDetails.address}
-            onChange={handleInputChange}
-            required
-            >
-            </input>
-          </div>
-
-
-          <div className="flex justify-end w-full pr-[3rem]">
-            <button 
-            type = "submit"
-            className = "bg-blue-500 text-white px-4 py-2 rounded"
-            >
-              Submit
-            </button>
-          </div>
-        </form>
-
-        <img className="h-[300px] w-auto" src="/venmo-QR.jpg"></img>
+      <div className="mt-6">
+        <Link
+          href="https://venmo.com/u/ptdanh"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-blue-600 hover:text-blue-800 font-semibold text-lg"
+        >
+          Pay via Venmo
+        </Link>
       </div>
-    </>
+    </div>
   );
 };
 
-export default Pickup;
+export default Delivery;
