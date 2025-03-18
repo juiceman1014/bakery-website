@@ -1,9 +1,7 @@
 flask
 flask_cors 
 flask_mail 
-flask_mysqldb
 flask_sqlalchemy 
 PyJWT
-jwt
 bcrypt
 pymysql
