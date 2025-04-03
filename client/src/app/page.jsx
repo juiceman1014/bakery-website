@@ -3,7 +3,7 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      <container className="flex flex-col">
+      <container className="flex flex-col bg-orange-50">
         <div className = "flex flex-row justify-end">
           <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
             <Link href="#about">About</Link>

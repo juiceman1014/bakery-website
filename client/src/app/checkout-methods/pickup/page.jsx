@@ -77,7 +77,7 @@ const Pickup = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen px-4">
+    <div className="flex flex-col items-center justify-center min-h-screen px-4 bg-orange-50">
       <form
         onSubmit={handleSubmit}
         className="bg-orange-100 p-8 rounded-lg shadow-lg w-full max-w-md"

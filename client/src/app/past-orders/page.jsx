@@ -45,7 +45,7 @@ const PastOrders = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div className="max-w-4xl mx-auto p-6 bg-orange-50">
       <h1 className="text-center text-2xl font-bold mb-6">Past Orders</h1>
       <div className="flex flex-col gap-6">
         {Object.keys(groupedOrders).length === 0 ? (
