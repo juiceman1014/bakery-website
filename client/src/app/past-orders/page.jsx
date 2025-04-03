@@ -16,7 +16,6 @@ const PastOrders = () => {
           const response = await axios.get(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/past-order/${user.ID}`
           );
-          console.log("Fetched orders:", response.data);
           setOrders(response.data);
 
           const grouped = response.data.reduce((acc, order) => {
@@ -28,7 +27,6 @@ const PastOrders = () => {
             return acc;
           }, {});
 
-          console.log("Grouped orders:", grouped);
           setGroupedOrders(grouped);
         } catch (error) {
           console.error("Error fetching past orders: ", error);
@@ -39,39 +37,50 @@ const PastOrders = () => {
   }, [user]);
 
   if (!user) {
-    return <div>Please log in to start tracking past orders.</div>;
+    return (
+      <div className="text-center text-gray-700 mt-10">
+        Please log in to start tracking past orders.
+      </div>
+    );
   }
 
   return (
-    <>
-      <h1 className="text-center">Past Orders</h1>
-      <div className="h-screen flex flex-col items-center justify-evenly">
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-center text-2xl font-bold mb-6">Past Orders</h1>
+      <div className="flex flex-col gap-6">
         {Object.keys(groupedOrders).length === 0 ? (
-          <div>No past orders found.</div>
+          <div className="text-center text-gray-500">No past orders found.</div>
         ) : (
           Object.keys(groupedOrders).map((orderID) => (
-            <div key={orderID} className="border-[2px] border-[black] p-4 mb-4">
-              <h2>
+            <div
+              key={orderID}
+              className="border border-gray-300 shadow-md p-4 rounded-lg bg-white"
+            >
+              <h2 className="text-lg font-semibold text-gray-800">
                 Order Date:{" "}
                 {new Date(
                   groupedOrders[orderID][0].order_date
                 ).toLocaleDateString()}
               </h2>
-
-              {groupedOrders[orderID].map((item, index) => (
-                <div
-                  key={index}
-                  className="border-t-[1px] border-[gray] mt-2 pt-2"
-                >
-                  <div>Item: {item.item_name}</div>
-                  <div>Quantity: {item.quantity}</div>
-                </div>
-              ))}
+              <div className="mt-3 space-y-2">
+                {groupedOrders[orderID].map((item, index) => (
+                  <div key={index} className="border-t border-gray-200 pt-2">
+                    <div className="text-gray-700">
+                      Item:{" "}
+                      <span className="font-medium">{item.item_name}</span>
+                    </div>
+                    <div className="text-gray-700">
+                      Quantity:{" "}
+                      <span className="font-medium">{item.quantity}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           ))
         )}
       </div>
-    </>
+    </div>
   );
 };
 
