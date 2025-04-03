@@ -13,61 +13,74 @@ const Navbar = () => {
 
   return (
     <div className="h-screen">
-      <div className="flex flex-col justify-between h-full w-24 bg-orange-100 items-center py-4 fixed">
-        <div className="hover:bg-orange-200 p-2 rounded-full">
-          <button>
-            <Link href="/">
-              <img
-                className="h-16 w-16 rounded-full"
-                src="/mooncake-sample-logo.jpeg"
-                alt="Mooncake Logo"
-              />
-            </Link>
-          </button>
-        </div>
+      <div className="fixed top-0 left-0 h-full w-24 bg-orange-50 flex flex-col justify-between items-center py-6">
 
-        <div>
-          <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-            <Link href="/menu">Menu/Order</Link>
-          </button>
-        </div>
+        {/* Logo */}
+        <Link href="/" className="hover:bg-orange-200 p-2 rounded-full transition">
+          <img
+            src="/mooncake-sample-logo.jpeg"
+            alt="Mooncake Logo"
+            className="h-16 w-16 rounded-full object-cover"
+          />
+        </Link>
 
-        <div className="flex flex-col items-center space-y-2">
+        {/* Navigation */}
+        <nav className="flex flex-col items-center space-y-4 mt-4">
+          <Link
+            href="/menu"
+            className="hover:bg-orange-200 text-sm font-medium p-2 rounded-md transition"
+          >
+            Menu
+          </Link>
+        </nav>
+
+        {/* User Section */}
+        <div className="flex flex-col items-center space-y-3">
           {user ? (
             <>
-              <div className="rounded-md text-sm font-medium break-words w-20">{user.email}</div>
-              <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium" onClick={handleLogout}>
+              <p className="text-xs text-center w-20 break-words font-medium text-gray-700">
+                {user.email}
+              </p>
+
+              <button
+                onClick={handleLogout}
+                className="hover:bg-orange-200 text-sm font-medium p-2 rounded-md transition"
+              >
                 Logout
               </button>
-              <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-                <Link href="/past-orders">Past Orders</Link>
-              </button>
+
+              <Link
+                href="/past-orders"
+                className="hover:bg-orange-200 text-sm font-medium p-2 rounded-md transition"
+              >
+                Past Orders
+              </Link>
             </>
           ) : (
-            <button className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-              <Link href="/login">Login</Link>
-            </button>
+            <Link
+              href="/login"
+              className="hover:bg-orange-200 text-sm font-medium p-2 rounded-md transition"
+            >
+              Login
+            </Link>
           )}
         </div>
 
-        <div className="hover:bg-orange-200 p-2 rounded-full">
-          <button>
-            <Link href="/cart">
-              <img
-                className="h-16 w-16 rounded-full"
-                src="/cart-sample-logo.jpeg"
-                alt="Cart Logo"
-              />
-            </Link>
+        {/* Cart Icon */}
+        <Link href="/cart" className="hover:bg-orange-200 p-2 rounded-full transition">
+          <img
+            src="/cart-sample-logo.jpeg"
+            alt="Cart Logo"
+            className="h-16 w-16 rounded-full object-cover"
+          />
+        </Link>
+
+        {/* Footer Buttons */}
+        <div className="flex flex-col items-center space-y-2 text-center text-xs font-medium text-gray-700">
+          <button className="hover:bg-orange-200 px-2 py-1 rounded-md transition">
+            Translate
           </button>
-        </div>
-
-        <div className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-          <button>Translate</button>
-        </div>
-
-        <div className="hover:bg-orange-200 p-2 rounded-md text-sm font-medium">
-          <button>Anh Danh © 2024</button>
+          <span className="text-[10px] text-gray-500">Anh Danh © 2024</span>
         </div>
       </div>
     </div>
